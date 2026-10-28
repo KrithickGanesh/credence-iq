@@ -1,0 +1,90 @@
+name: credenceiq
+
+services:
+  exasol:
+    image: exasol/docker-db:2026.1.2
+    container_name: credenceiq-exasol
+    privileged: true
+    ports:
+      - "8563:8563"
+    volumes:
+      - exasol_data:/exasol
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /exa/etc/init_done"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 90s
+    restart: unless-stopped
+
+  seed:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "seed_data.py", "--if-empty", "--customers", "30000"]
+    environment:
+      EXASOL_HOST: exasol
+      EXASOL_PORT: 8563
+      EXASOL_USER: sys
+      EXASOL_PASSWORD: exasol
+      EXASOL_SCHEMA: CREDENCEIQ
+      SEED_CUSTOMERS: 30000
+    depends_on:
+      exasol:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: credenceiq-api
+    environment:
+      EXASOL_HOST: exasol
+      EXASOL_PORT: 8563
+      EXASOL_USER: sys
+      EXASOL_PASSWORD: exasol
+      EXASOL_SCHEMA: CREDENCEIQ
+      EXASOL_POOL_SIZE: 8
+      CORS_ORIGINS: http://localhost:3000
+      LLM_PROVIDER: none
+      LENDER_NAME: CredenceIQ Demo Bank, N.A.
+      LENDER_ADDRESS: 100 Market Street, San Francisco, CA 94105
+      LENDER_PHONE: 1-800-555-0142
+      LENDER_EMAIL: adverse.action@credenceiq.example
+    ports:
+      - "8000:8000"
+    depends_on:
+      exasol:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/live')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: credenceiq-web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  exasol_data:
+    name: credenceiq-exasol-data
