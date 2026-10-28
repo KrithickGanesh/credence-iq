@@ -1,37 +1,38 @@
 name: credenceiq
 
-services:
-  exasol:
-    image: exasol/docker-db:2026.1.2
-    container_name: credenceiq-exasol
-    privileged: true
-    ports:
-      - "8563:8563"
-    volumes:
-      - exasol_data:/exasol
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /exa/etc/init_done"]
-      interval: 15s
-      timeout: 5s
-      retries: 40
-      start_period: 90s
-    restart: unless-stopped
+# Primary path: Exasol Personal runs on the HOST (Podman), managed by exakit.
+#   exakit start
+#   exakit status
+#
+# This compose file only containerises the app tier. The containers reach the
+# host database through host.docker.internal, and the password is read from
+# .env (never committed). For the optional docker-db stack, see
+# docker-compose.docker-db.yml.
 
+x-exasol-env: &exasol-env
+  EXASOL_HOST: host.docker.internal
+  EXASOL_PORT: "8563"
+  EXASOL_USER: sys
+  EXASOL_PASSWORD: ${EXASOL_PASSWORD:?Set EXASOL_PASSWORD in .env - see .env.example}
+  EXASOL_SCHEMA: ${EXASOL_SCHEMA:-CREDENCEIQ}
+  # Personal uses a self-signed local certificate.
+  EXASOL_TLS_VERIFY: "false"
+  # Personal permits at most 5 concurrent sessions.
+  EXASOL_POOL_SIZE: "3"
+
+x-host-gateway: &host-gateway
+  - "host.docker.internal:host-gateway"
+
+services:
   seed:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: ["python", "seed_data.py", "--if-empty", "--customers", "30000"]
+    command: ["python", "seed_data.py", "--if-empty", "--customers", "${SEED_CUSTOMERS:-30000}"]
     environment:
-      EXASOL_HOST: exasol
-      EXASOL_PORT: 8563
-      EXASOL_USER: sys
-      EXASOL_PASSWORD: exasol
-      EXASOL_SCHEMA: CREDENCEIQ
-      SEED_CUSTOMERS: 30000
-    depends_on:
-      exasol:
-        condition: service_healthy
+      <<: *exasol-env
+      SEED_CUSTOMERS: ${SEED_CUSTOMERS:-30000}
+    extra_hosts: *host-gateway
     restart: "no"
 
   api:
@@ -40,23 +41,16 @@ services:
       dockerfile: backend/Dockerfile
     container_name: credenceiq-api
     environment:
-      EXASOL_HOST: exasol
-      EXASOL_PORT: 8563
-      EXASOL_USER: sys
-      EXASOL_PASSWORD: exasol
-      EXASOL_SCHEMA: CREDENCEIQ
-      EXASOL_POOL_SIZE: 8
-      CORS_ORIGINS: http://localhost:3000
-      LLM_PROVIDER: none
-      LENDER_NAME: CredenceIQ Demo Bank, N.A.
-      LENDER_ADDRESS: 100 Market Street, San Francisco, CA 94105
-      LENDER_PHONE: 1-800-555-0142
-      LENDER_EMAIL: adverse.action@credenceiq.example
+      <<: *exasol-env
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      LENDER_NAME: ${LENDER_NAME:-CredenceIQ Finance Ltd.}
+      LENDER_ADDRESS: ${LENDER_ADDRESS:-Bandra Kurla Complex, Mumbai, Maharashtra 400051}
+      LENDER_PHONE: ${LENDER_PHONE:-+91-22-5550-0142}
+      LENDER_EMAIL: ${LENDER_EMAIL:-adverse.action@credenceiq.example}
+    extra_hosts: *host-gateway
     ports:
       - "8000:8000"
-    depends_on:
-      exasol:
-        condition: service_healthy
     healthcheck:
       test:
         [
@@ -74,17 +68,13 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     container_name: credenceiq-web
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     ports:
       - "3000:3000"
     depends_on:
       api:
         condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  exasol_data:
-    name: credenceiq-exasol-data

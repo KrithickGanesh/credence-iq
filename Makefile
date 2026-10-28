@@ -6,24 +6,33 @@ else
 PYTHON := .venv/bin/python
 endif
 
-.PHONY: help install seed dry-run api web test bench up down logs clean
+.PHONY: help install seed dry-run api web test bench up up-fallback down logs status start clean
 
 help:
 	@echo "CredenceIQ targets"
-	@echo "  make install   Create .venv and install backend dependencies"
-	@echo "  make seed      Generate 30,000 customers / 300k+ rows in Exasol"
-	@echo "  make dry-run   Generate 2,000 customers without touching Exasol"
-	@echo "  make api       Run FastAPI on http://localhost:8000"
-	@echo "  make web       Run the Next.js dashboard on http://localhost:3000"
-	@echo "  make test      Run deterministic scoring tests"
-	@echo "  make bench     Benchmark legacy N+1 vs one Exasol pass"
-	@echo "  make up        Start the full stack with Docker Compose"
-	@echo "  make down      Stop the Docker stack"
+	@echo "  make install     Create .venv and install backend dependencies"
+	@echo "  make status      Show Exasol Personal status (exakit status)"
+	@echo "  make start       Start Exasol Personal (exakit start)"
+	@echo "  make seed        Generate 30,000 customers / ~292k rows in Exasol"
+	@echo "  make dry-run     Generate 2,000 customers without touching Exasol"
+	@echo "  make api         Run FastAPI on http://localhost:8000"
+	@echo "  make web         Run the Next.js dashboard on http://localhost:3000"
+	@echo "  make test        Run deterministic scoring tests"
+	@echo "  make bench       Benchmark per-customer N+1 vs one set-based pass"
+	@echo "  make up          Containerise the app tier against host Exasol Personal"
+	@echo "  make up-fallback Start the optional exasol/docker-db stack instead"
+	@echo "  make down        Stop the Docker stack"
 
 install:
 	python -m venv .venv
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -r backend/requirements.txt
+
+status:
+	exakit status
+
+start:
+	exakit start
 
 seed:
 	$(PYTHON) seed_data.py --if-empty --customers 30000
@@ -45,6 +54,9 @@ bench:
 
 up:
 	docker compose up -d --build
+
+up-fallback:
+	docker compose -f docker-compose.docker-db.yml up -d --build
 
 down:
 	docker compose down
