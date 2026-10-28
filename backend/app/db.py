@@ -77,9 +77,11 @@ class ExasolPool:
             password=self.password,
             compression=True,
             encryption=True,
-            # Exasol Personal ships a self-signed certificate. Production
-            # deployments should pin the fingerprint or use a trusted CA.
-            websocket_sslopt={"cert_reqs": ssl.CERT_NONE},
+            # Exasol Personal ships a self-signed certificate. Verification is
+            # controlled by EXASOL_TLS_VERIFY so a CA-signed deployment can enforce it.
+            websocket_sslopt={
+                "cert_reqs": ssl.CERT_REQUIRED if settings.exasol_tls_verify else ssl.CERT_NONE
+            },
             fetch_dict=True,
             lower_ident=True,
             connection_timeout=15,

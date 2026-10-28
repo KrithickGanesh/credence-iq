@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from .config import settings
 from .db import DatabaseQueryError, DatabaseUnavailable, pool
-from .routers import applications, applicants, factors, health, overview
+from .routers import applications, applicants, factors, health, overview, scoring
 
 logging.basicConfig(
     level=logging.INFO,
@@ -95,6 +95,7 @@ app.include_router(overview.router, prefix="/api")
 app.include_router(applications.router, prefix="/api")
 app.include_router(applicants.router, prefix="/api")
 app.include_router(factors.router, prefix="/api")
+app.include_router(scoring.router, prefix="/api")
 
 
 @app.get("/", include_in_schema=False)
@@ -114,6 +115,7 @@ def api_index() -> dict:
             "/api/applicant/{customer_id}/reconciliation",
             "/api/applicant/{customer_id}/adverse-action",
             "/api/applicant/{customer_id}/simulate",
+            "/api/scoring/udf",
             "/api/factors",
             "/api/health",
         ],

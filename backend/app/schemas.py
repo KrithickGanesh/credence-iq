@@ -400,6 +400,20 @@ class OverviewResponse(ApiModel):
     generated_at: datetime
 
 
+class UdfScoringResponse(ApiModel):
+    script: str
+    engine: str
+    customers_scored: int
+    matching_scores: int
+    agreement_rate: float
+    mean_abs_difference: float
+    max_abs_difference: float
+    decision_matches: int
+    decision_mix: dict[str, int]
+    elapsed_ms: float
+    generated_at: datetime
+
+
 # ---------------------------------------------------------------------------
 # Health / metadata
 # ---------------------------------------------------------------------------

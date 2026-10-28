@@ -13,14 +13,14 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
 MIN_SCORE = 300.0
-MAX_SCORE = 850.0
+MAX_SCORE = 900.0
 
 FACTOR_DEFINITIONS: list[dict[str, Any]] = [
     {
         "factor_code": "SCORE_BASE",
         "factor_name": "Model baseline",
         "category": "MODEL",
-        "weight": 715.0,
+        "weight": 790.0,
         "benchmark_threshold": 0.0,
         "comparison_operator": "NONE",
         "severity": "INFO",
@@ -34,7 +34,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "factor_code": "DECISION_APPROVE_THRESHOLD",
         "factor_name": "Approval threshold",
         "category": "MODEL",
-        "weight": 680.0,
+        "weight": 750.0,
         "benchmark_threshold": 0.0,
         "comparison_operator": "NONE",
         "severity": "INFO",
@@ -48,7 +48,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "factor_code": "DECISION_REFER_THRESHOLD",
         "factor_name": "Manual review threshold",
         "category": "MODEL",
-        "weight": 610.0,
+        "weight": 680.0,
         "benchmark_threshold": 0.0,
         "comparison_operator": "NONE",
         "severity": "INFO",
@@ -60,16 +60,19 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "factor_code": "BUREAU_SCORE",
-        "factor_name": "Credit bureau score",
+        "factor_name": "Credit bureau score (CIBIL-style)",
         "category": "CREDIT_HISTORY",
         "weight": 0.30,
-        "benchmark_threshold": 640.0,
+        "benchmark_threshold": 680.0,
         "comparison_operator": "GTE",
         "severity": "HIGH",
-        "regulation_ref": "FCRA 15 U.S.C. Sec. 1681m; Reg B 12 CFR 1002.9",
+        "regulation_ref": (
+            "RBI (Credit Information Reporting) Directions, 2025; "
+            "Credit Information Companies (Regulation) Act, 2005"
+        ),
         "adverse_action_reason": "Credit bureau score materially below the portfolio benchmark.",
         "plain_language_template": (
-            "Your credit bureau score of {observed} is below our benchmark of "
+            "Your CIBIL-style credit bureau score of {observed} is below our benchmark of "
             "{benchmark}. A lower score can reflect late payments, high balances, "
             "or limited credit history."
         ),
@@ -84,7 +87,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.40,
         "comparison_operator": "LTE",
         "severity": "HIGH",
-        "regulation_ref": "Reg B 12 CFR 1002.9; ability-to-repay policy",
+        "regulation_ref": "RBI Fair Practices Code for Lenders; ability-to-repay policy",
         "adverse_action_reason": (
             "Proposed debt service would consume more than the policy guideline "
             "for monthly income."
@@ -105,7 +108,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.0,
         "comparison_operator": "LTE",
         "severity": "HIGH",
-        "regulation_ref": "Reg B 12 CFR 1002.9",
+        "regulation_ref": "RBI Fair Practices Code for Lenders",
         "adverse_action_reason": "One or more delinquent accounts reported in the past 12 months.",
         "plain_language_template": (
             "Our review found {observed} delinquent account(s) reported in the last "
@@ -122,7 +125,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 2.0,
         "comparison_operator": "LTE",
         "severity": "MEDIUM",
-        "regulation_ref": "FCRA 15 U.S.C. Sec. 1681m",
+        "regulation_ref": "RBI (Credit Information Reporting) Directions, 2025",
         "adverse_action_reason": "Frequent recent applications for new credit.",
         "plain_language_template": (
             "You have {observed} hard credit inquiries in the last 6 months. Our "
@@ -139,7 +142,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.30,
         "comparison_operator": "LTE",
         "severity": "MEDIUM",
-        "regulation_ref": "Reg B 12 CFR 1002.9",
+        "regulation_ref": "RBI Fair Practices Code for Lenders",
         "adverse_action_reason": "Revolving credit balances are high relative to available limits.",
         "plain_language_template": (
             "You are using {observed_pct} of your available revolving credit. Our "
@@ -156,7 +159,10 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.02,
         "comparison_operator": "LTE",
         "severity": "HIGH",
-        "regulation_ref": "FCRA 15 U.S.C. Sec. 1681e(b) and Sec. 1681i",
+        "regulation_ref": (
+            "RBI (Credit Information Reporting) Directions, 2025; "
+            "Digital Personal Data Protection Act, 2023"
+        ),
         "adverse_action_reason": (
             "Internal core, card, and micro-credit systems report conflicting balances "
             "for the same facility."
@@ -177,7 +183,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.0,
         "comparison_operator": "LTE",
         "severity": "HIGH",
-        "regulation_ref": "Reg B 12 CFR 1002.9",
+        "regulation_ref": "RBI Fair Practices Code for Lenders",
         "adverse_action_reason": "An account is currently past due.",
         "plain_language_template": (
             "At least one account is {observed} days past due. Our guideline is "
@@ -194,7 +200,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.0,
         "comparison_operator": "LTE",
         "severity": "MEDIUM",
-        "regulation_ref": "Reg B 12 CFR 1002.9",
+        "regulation_ref": "RBI Fair Practices Code for Lenders",
         "adverse_action_reason": "One or more accounts are in collections.",
         "plain_language_template": (
             "Our review found {observed} account(s) in collections. Our guideline is "
@@ -211,7 +217,7 @@ FACTOR_DEFINITIONS: list[dict[str, Any]] = [
         "benchmark_threshold": 0.0,
         "comparison_operator": "LTE",
         "severity": "HIGH",
-        "regulation_ref": "Reg B 12 CFR 1002.9",
+        "regulation_ref": "RBI Fair Practices Code for Lenders",
         "adverse_action_reason": "A bankruptcy is reported in the applicant's credit history.",
         "plain_language_template": (
             "A bankruptcy is reported in your credit history. Our guideline is "
@@ -280,13 +286,13 @@ def grade_for(score: float, weights: Mapping[str, Mapping[str, Any]] | None = No
         if score >= refer:
             return "D"
         return "E"
-    if score >= 760:
+    if score >= 830:
         return "A"
-    if score >= 720:
+    if score >= 750:
         return "B"
-    if score >= 680:
+    if score >= 710:
         return "C"
-    if score >= 610:
+    if score >= 680:
         return "D"
     return "E"
 
@@ -378,7 +384,7 @@ def score_metrics(
 
     w = weights or default_weights()
 
-    bureau_score = float(metrics.get("bureau_score") or 640.0)
+    bureau_score = float(metrics.get("bureau_score") or 680.0)
     dti = max(0.0, float(metrics.get("dti_ratio") or 0.0))
     delinquencies = max(0.0, float(metrics.get("delinquencies_12m") or 0.0))
     inquiries = max(0.0, float(metrics.get("hard_inquiries_6m") or 0.0))
@@ -536,3 +542,105 @@ def build_score_sql(
             + {collections_weight:.6f} * {c['collections_count']}
             + {bankruptcy_weight:.6f} * {c['bankruptcies']}
         )), 1)"""
+
+
+def build_score_udf(
+    weights: Mapping[str, Mapping[str, Any]] | None = None,
+    schema: str = "CREDENCEIQ",
+    script: str = "SCORE_PORTFOLIO",
+) -> str:
+    """Build an Exasol Python SET UDF that reproduces the scoring model in-database.
+
+    The UDF is generated from the same ``RISK_FACTOR_WEIGHTS`` rows as the SQL
+    view, so the model cannot drift between the two engines.  It scores an
+    entire applicant set inside Exasol instead of shipping factor rows to the
+    application tier.
+    """
+
+    w = weights or default_weights()
+
+    base = _weight(w, "SCORE_BASE")
+    bureau_benchmark = _threshold(w, "BUREAU_SCORE")
+    bureau_weight = _weight(w, "BUREAU_SCORE")
+    dti_threshold = _threshold(w, "DTI_RATIO")
+    dti_weight = _weight(w, "DTI_RATIO")
+    delinq_weight = _weight(w, "DELINQUENCY_12M")
+    inquiry_threshold = _threshold(w, "HARD_INQUIRY_6M")
+    inquiry_weight = _weight(w, "HARD_INQUIRY_6M")
+    util_threshold = _threshold(w, "UTILIZATION")
+    util_weight = _weight(w, "UTILIZATION")
+    var_threshold = _threshold(w, "EXPOSURE_MISMATCH")
+    var_weight = _weight(w, "EXPOSURE_MISMATCH")
+    dpd_weight = _weight(w, "DAYS_PAST_DUE")
+    collections_weight = _weight(w, "COLLECTIONS")
+    bankruptcy_weight = _weight(w, "BANKRUPTCY")
+    approve = approval_threshold(w)
+    refer = refer_threshold(w)
+
+    return f"""CREATE OR REPLACE PYTHON3 SET SCRIPT {schema}.{script}(
+    CUSTOMER_ID DECIMAL(12,0),
+    BUREAU_SCORE DOUBLE,
+    DTI_RATIO DOUBLE,
+    DELINQUENCIES_12M DOUBLE,
+    HARD_INQUIRIES_6M DOUBLE,
+    UTILIZATION_RATIO DOUBLE,
+    VARIANCE_RATIO DOUBLE,
+    MAX_DPD DOUBLE,
+    COLLECTIONS_COUNT DOUBLE,
+    BANKRUPTCIES DOUBLE
+)
+EMITS (
+    CUSTOMER_ID_OUT DECIMAL(12,0),
+    SCORE DOUBLE,
+    DECISION VARCHAR(10),
+    GRADE VARCHAR(2)
+) AS
+def run(ctx):
+    while True:
+        bureau = float(ctx.BUREAU_SCORE) if ctx.BUREAU_SCORE is not None else {bureau_benchmark:.6f}
+        dti = max(0.0, float(ctx.DTI_RATIO) if ctx.DTI_RATIO is not None else 0.0)
+        delinq = max(0.0, float(ctx.DELINQUENCIES_12M) if ctx.DELINQUENCIES_12M is not None else 0.0)
+        inquiries = max(0.0, float(ctx.HARD_INQUIRIES_6M) if ctx.HARD_INQUIRIES_6M is not None else 0.0)
+        utilization = max(0.0, float(ctx.UTILIZATION_RATIO) if ctx.UTILIZATION_RATIO is not None else 0.0)
+        variance = max(0.0, float(ctx.VARIANCE_RATIO) if ctx.VARIANCE_RATIO is not None else 0.0)
+        dpd = max(0.0, float(ctx.MAX_DPD) if ctx.MAX_DPD is not None else 0.0)
+        collections = max(0.0, float(ctx.COLLECTIONS_COUNT) if ctx.COLLECTIONS_COUNT is not None else 0.0)
+        bankruptcies = max(0.0, float(ctx.BANKRUPTCIES) if ctx.BANKRUPTCIES is not None else 0.0)
+
+        score = {base:.6f}
+        score += (bureau - {bureau_benchmark:.6f}) * {bureau_weight:.6f}
+        if dti > {dti_threshold:.6f}:
+            score += {dti_weight:.6f} * (1.0 + 2.5 * (dti - {dti_threshold:.6f}))
+        score += {delinq_weight:.6f} * delinq
+        score += {inquiry_weight:.6f} * max(0.0, inquiries - {inquiry_threshold:.6f})
+        if utilization > {util_threshold:.6f}:
+            score += {util_weight:.6f} * min(3.0, (utilization - {util_threshold:.6f}) / 0.25)
+        if variance > {var_threshold:.6f}:
+            score += {var_weight:.6f} * min(2.0, (variance - {var_threshold:.6f}) / 0.09)
+        score += {dpd_weight:.6f} * dpd
+        score += {collections_weight:.6f} * collections
+        score += {bankruptcy_weight:.6f} * bankruptcies
+        score = round(min({MAX_SCORE:.1f}, max({MIN_SCORE:.1f}, score)), 1)
+
+        if score >= {approve:.1f}:
+            decision = 'APPROVED'
+        elif score >= {refer:.1f}:
+            decision = 'REFERRED'
+        else:
+            decision = 'DECLINED'
+
+        if score >= {approve + 80:.1f}:
+            grade = 'A'
+        elif score >= {approve:.1f}:
+            grade = 'B'
+        elif score >= {approve - 40:.1f}:
+            grade = 'C'
+        elif score >= {refer:.1f}:
+            grade = 'D'
+        else:
+            grade = 'E'
+
+        ctx.emit(ctx.CUSTOMER_ID, score, decision, grade)
+        if not ctx.next():
+            break
+/"""

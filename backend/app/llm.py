@@ -24,26 +24,42 @@ from .schemas import (
 logger = logging.getLogger("credenceiq.llm")
 
 DISCLAIMER = (
-    "CredenceIQ generates a draft disclosure from live analytical data. It is not legal "
-    "advice. A qualified compliance reviewer must approve the final notice before it is "
-    "sent to a consumer."
+    "CredenceIQ generates a draft credit-decision notice from live analytical data. It is "
+    "not legal advice and is not a substitute for review by a qualified compliance officer. "
+    "The portfolio and applicant records in this demo are synthetic."
 )
 
 BASE_APPEAL_RIGHTS = [
-    "You have the right to obtain a free copy of your consumer report from the consumer "
-    "reporting agency named in this notice within 60 days of this decision.",
-    "You have the right to dispute inaccurate or incomplete information directly with the "
-    "consumer reporting agency.",
-    "You have the right to request a written statement of the specific reasons for this "
-    "decision, and to ask for a review by a person rather than an automated system.",
-    "You have the right to provide additional information that may affect the decision.",
-    "CredenceIQ does not discriminate on the basis of race, color, religion, national origin, "
-    "sex, marital status, age, or receipt of public assistance.",
+    "You have the right to obtain one free full credit report from the credit information "
+    "company named in this notice every calendar year, and to dispute inaccurate or "
+    "incomplete credit information.",
+    "You have the right to be informed of the main reasons for the credit decision, as "
+    "required by the RBI Fair Practices Code for Lenders.",
+    "You have the right to request a review of this decision by a person and to submit "
+    "additional information or documents for reconsideration.",
+    "You have the right to raise a grievance with our Grievance Redressal Officer. If it is "
+    "not resolved within 30 days, you may approach the Reserve Bank - Integrated Ombudsman "
+    "Scheme, 2021 (cms.rbi.org.in / 14448).",
+    "We process your personal data under the Digital Personal Data Protection Act, 2023 and "
+    "the DPDP Rules, 2025. You may request correction or erasure of data that is no longer "
+    "required for a legal purpose.",
 ]
 
 
 def _fmt_money(value: float) -> str:
-    return f"${value:,.0f}"
+    """Format an INR amount with Indian lakh/crore digit grouping."""
+
+    digits = f"{abs(float(value)):,.0f}".replace(",", "")
+    if len(digits) > 3:
+        head, tail = digits[:-3], digits[-3:]
+        groups: list[str] = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            groups.insert(0, head)
+        digits = ",".join(groups + [tail])
+    return f"{'-' if value < 0 else ''}₹{digits}"
 
 
 def _fmt_pct(value: float) -> str:
@@ -72,7 +88,7 @@ def _disclosures(detail: dict[str, Any]) -> list[FactorDisclosure]:
             factor_code=str(factor["factor_code"]),
             factor_name=str(factor["factor_name"]),
             finding=str(factor.get("plain_language") or factor.get("reason") or ""),
-            regulation=str(factor.get("regulation_ref") or "Reg B 12 CFR 1002.9"),
+            regulation=str(factor.get("regulation_ref") or "RBI Fair Practices Code for Lenders"),
             impact=f"Reduced the eligibility score by {abs(float(factor.get('contribution', 0))):.1f} points.",
         )
         for factor in _top_factors(detail)
@@ -103,10 +119,11 @@ def _letter_body(detail: dict[str, Any], disclosures: list[FactorDisclosure]) ->
         )
     bureau = detail.get("bureau_records") or []
     bureau_line = (
-        f"The consumer reporting agency that supplied information used in this decision: "
-        f"{bureau[0]['bureau_name']}. Your reported score was {bureau[0]['bureau_score']}."
+        f"The credit information company that supplied information used in this decision: "
+        f"{bureau[0]['bureau_name']}. Your reported CIBIL-style score was "
+        f"{bureau[0]['bureau_score']}."
         if bureau
-        else "We used information from a consumer reporting agency in making this decision."
+        else "We used information from a credit information company in making this decision."
     )
     return (
         f"Dear {applicant['first_name']} {applicant['last_name']},\n\n"
@@ -116,10 +133,10 @@ def _letter_body(detail: dict[str, Any], disclosures: list[FactorDisclosure]) ->
         f"{outcome}\n\n"
         f"Principal reasons:\n{reasons}\n\n"
         f"{bureau_line}\n\n"
-        "You have the right to obtain a free copy of your consumer report from the consumer "
-        "reporting agency within 60 days and to dispute any inaccurate or incomplete information "
-        "it contains. You also have the right to request a statement of the specific reasons for "
-        "this decision and to have the decision reviewed by a person.\n\n"
+        "You have the right to obtain one free full credit report from the credit information "
+        "company every calendar year and to dispute any inaccurate or incomplete information "
+        "it contains. You also have the right to request the main reasons for this decision in "
+        "writing and to have the decision reviewed by a person.\n\n"
         "If you believe there is an error in the information we used, please contact us using the "
         "details below. We will investigate and, where appropriate, reconsider your application.\n\n"
         f"Sincerely,\n{settings.lender_name}\n{settings.lender_address}\n{settings.lender_phone}"
@@ -185,15 +202,16 @@ def build_template(detail: dict[str, Any], request: AdverseActionRequest) -> Gen
     disclosures = _disclosures(detail)
     application = detail["application"]
     letter = ComplianceLetter(
-        title="Adverse Action Notice",
+        title="Credit Decision Notice",
         recipient=_recipient(detail),
         body=_letter_body(detail, disclosures),
         factor_disclosures=disclosures,
         appeal_rights=BASE_APPEAL_RIGHTS
         + (
             [
-                "This notice is provided under the Fair Credit Reporting Act (FCRA) and the "
-                "Equal Credit Opportunity Act (ECOA). State-specific disclosures may apply."
+                "This notice is provided under the RBI Fair Practices Code for Lenders, the "
+                "RBI (Credit Information Reporting) Directions, 2025, and the Digital Personal "
+                "Data Protection Act, 2023. It is a draft for compliance review."
             ]
             if request.include_state_disclosure
             else []
@@ -264,17 +282,19 @@ def _prompt(detail: dict[str, Any], request: AdverseActionRequest, reference: Ge
         "reference_draft": reference.model_dump(mode="json"),
     }
     return (
-        "You are a senior consumer-compliance analyst at a regulated lender. Draft an "
-        "adverse-action notice and a plain-English customer explanation using ONLY the facts "
-        "in the input. Comply with FCRA 15 U.S.C. Sec. 1681m and ECOA / Regulation B 12 CFR "
-        "1002.9. Do not invent agencies, account numbers, dates, reasons, or promises of "
-        "approval. Do not mention protected characteristics. Keep the letter concise, "
-        "specific, and professional. The reference draft is a factual baseline; improve the "
-        "wording but do not add facts or remove the disclosed factors.\n\n"
+        "You are a senior consumer-compliance analyst at a regulated Indian lender. Draft a "
+        "credit-decision notice (regret letter) and a plain-English customer explanation using "
+        "ONLY the facts in the input. Comply with the RBI Fair Practices Code for Lenders, the "
+        "RBI (Credit Information Reporting) Directions, 2025, the RBI (Digital Lending) "
+        "Directions, 2025, and the Digital Personal Data Protection Act, 2023. Do not invent "
+        "agencies, account numbers, dates, reasons, or promises of approval. Do not mention "
+        "protected characteristics. Use INR amounts. Keep the letter concise, specific, and "
+        "professional. The reference draft is a factual baseline; improve the wording but do "
+        "not add facts or remove the disclosed factors.\n\n"
         "Return a single JSON object with exactly this shape:\n"
         "{\n"
         '  "compliance_letter": {\n'
-        '    "title": "Adverse Action Notice",\n'
+        '    "title": "Credit Decision Notice",\n'
         '    "recipient": "Name, City, State",\n'
         '    "body": "full letter text with newlines",\n'
         '    "factor_disclosures": [{"factor_code": "...", "factor_name": "...", '

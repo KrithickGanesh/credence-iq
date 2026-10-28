@@ -68,7 +68,7 @@ async def adverse_action(customer_id: int, body: AdverseActionRequest) -> dict:
         raise HTTPException(
             status_code=409,
             detail=(
-                "Adverse-action notices are only available for declined or referred "
+                "Credit-decision notices are only available for declined or referred "
                 "applications. This applicant is currently approved."
             ),
         )

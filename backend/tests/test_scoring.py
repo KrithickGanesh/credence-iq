@@ -50,14 +50,14 @@ SUBPRIME = {
 
 def test_prime_profile_is_approved_and_grade_b() -> None:
     result = score_metrics(PRIME)
-    assert result.score == pytest.approx(757.0)
+    assert result.score == pytest.approx(820.0)
     assert result.decision == "APPROVED"
     assert result.grade == "B"
 
 
 def test_subprime_profile_is_declined() -> None:
     result = score_metrics(SUBPRIME)
-    assert result.score < 610
+    assert result.score < 680
     assert result.decision == "DECLINED"
     assert result.grade == "E"
 
@@ -80,20 +80,20 @@ def test_score_is_clamped_to_model_bounds() -> None:
 
 def test_decision_thresholds_are_inclusive() -> None:
     weights = default_weights()
-    assert decision_for(680, weights) == "APPROVED"
-    assert decision_for(679.9, weights) == "REFERRED"
-    assert decision_for(610, weights) == "REFERRED"
-    assert decision_for(609.9, weights) == "DECLINED"
-    assert approval_threshold(weights) == 680
-    assert refer_threshold(weights) == 610
+    assert decision_for(750, weights) == "APPROVED"
+    assert decision_for(749.9, weights) == "REFERRED"
+    assert decision_for(680, weights) == "REFERRED"
+    assert decision_for(679.9, weights) == "DECLINED"
+    assert approval_threshold(weights) == 750
+    assert refer_threshold(weights) == 680
 
 
 def test_grade_bands_follow_thresholds() -> None:
-    assert grade_for(760) == "A"
-    assert grade_for(720) == "B"
-    assert grade_for(680) == "C"
-    assert grade_for(610) == "D"
-    assert grade_for(609.9) == "E"
+    assert grade_for(830) == "A"
+    assert grade_for(750) == "B"
+    assert grade_for(710) == "C"
+    assert grade_for(680) == "D"
+    assert grade_for(679.9) == "E"
 
 
 def test_contributions_reconcile_to_the_final_score() -> None:
@@ -139,8 +139,8 @@ def test_weight_override_changes_the_score() -> None:
     profile = {**PRIME, "bureau_score": 760}
     baseline = score_metrics(profile)
     boosted = score_metrics(profile, adjusted)
-    # 120 points above benchmark at +0.7 extra weight per point = +84.
-    assert boosted.score - baseline.score == pytest.approx(84.0)
+    # 80 points above benchmark at +0.7 extra weight per point = +56.
+    assert boosted.score - baseline.score == pytest.approx(56.0)
 
 
 def test_coerce_weights_normalises_exasol_rows() -> None:
@@ -161,7 +161,7 @@ def test_coerce_weights_normalises_exasol_rows() -> None:
 
 def test_sql_expression_embeds_weights_and_columns() -> None:
     sql = build_score_sql(columns={"bureau_score": "b.bureau_score"})
-    assert "LEAST(850.0" in sql
+    assert "LEAST(900.0" in sql
     assert "GREATEST(300.0" in sql
     assert "b.bureau_score" in sql
     assert "portfolio_utilization_ratio" in sql

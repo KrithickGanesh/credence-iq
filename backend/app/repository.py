@@ -59,6 +59,22 @@ def _normalise_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [{key: _iso(value) for key, value in row.items()} for row in rows]
 
 
+def format_inr(value: float) -> str:
+    """Format an INR amount using Indian lakh/crore digit grouping."""
+
+    digits = f"{abs(float(value)):,.0f}".replace(",", "")
+    if len(digits) > 3:
+        head, tail = digits[:-3], digits[-3:]
+        groups: list[str] = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            groups.insert(0, head)
+        digits = ",".join(groups + [tail])
+    return f"{'-' if value < 0 else ''}₹{digits}"
+
+
 def _f(row: dict[str, Any], key: str, default: float = 0.0) -> float:
     value = row.get(key)
     try:
@@ -128,6 +144,7 @@ def list_applications(
     page_size: int = 20,
     search: str | None = None,
     decision: str | None = None,
+    eligibility_decision: str | None = None,
     discrepancy_only: bool = False,
     sort: str = "decision_date",
     direction: Literal["asc", "desc"] = "desc",
@@ -149,6 +166,9 @@ def list_applications(
     if decision:
         filters.append("latest_decision = {decision}")
         params["decision"] = decision.upper()
+    if eligibility_decision:
+        filters.append("eligibility_decision = {eligibility_decision}")
+        params["eligibility_decision"] = eligibility_decision.upper()
     if discrepancy_only:
         filters.append("reconciliation_status <> 'RECONCILED'")
 
@@ -204,7 +224,7 @@ def get_applicant_row(pool: ExasolPool, customer_id: int) -> tuple[dict[str, Any
 
 def _metric_map(row: dict[str, Any]) -> dict[str, float]:
     return {
-        "bureau_score": _f(row, "bureau_score", 640),
+        "bureau_score": _f(row, "bureau_score", 680),
         "dti_ratio": _f(row, "latest_dti_ratio"),
         "delinquencies_12m": _f(row, "delinquencies_12m"),
         "hard_inquiries_6m": _f(row, "hard_inquiries_6m"),
@@ -497,7 +517,7 @@ def simulate(pool: ExasolPool, customer_id: int, request: SimulationRequest) -> 
             "code": "REVOLVING_PAYDOWN",
             "label": "Pay down revolving balances",
             "description": (
-                f"Apply ${request.revolving_paydown:,.0f} to the card engine and recompute "
+                f"Apply {format_inr(request.revolving_paydown)} to the card engine and recompute "
                 "gross exposure and utilization."
             ),
             "score_impact": round(paydown_only["score"] - current["score"], 1),
@@ -518,7 +538,7 @@ def simulate(pool: ExasolPool, customer_id: int, request: SimulationRequest) -> 
             "code": "VERIFIED_INCOME",
             "label": "Document additional income",
             "description": (
-                f"Verify ${request.income_increase_annual:,.0f} of additional annual income, "
+                f"Verify {format_inr(request.income_increase_annual)} of additional annual income, "
                 "which reduces the debt-to-income ratio."
             ),
             "score_impact": round(income_only["score"] - current["score"], 1),
@@ -561,7 +581,7 @@ def simulate(pool: ExasolPool, customer_id: int, request: SimulationRequest) -> 
             additional_paydown = additional
             reachable = True
             message = (
-                f"An additional ${additional:,.0f} revolving paydown beyond the current scenario "
+                f"An additional {format_inr(additional)} revolving paydown beyond the current scenario "
                 f"would move the file above {target:.0f}."
             )
         else:
@@ -589,7 +609,7 @@ def simulate(pool: ExasolPool, customer_id: int, request: SimulationRequest) -> 
             "message": message,
         },
         "assumptions": [
-            "Ledger balances update immediately and are reflected in the next bureau cycle.",
+            "Ledger balances update immediately and are reflected in the next credit-information cycle.",
             "Additional income must be documented and independently verified.",
             "Sanctioned limits and all non-adjusted factors remain unchanged.",
             "This is a pre-decision estimate, not a credit offer or approval commitment.",
@@ -659,6 +679,63 @@ def _month_range(count: int = 12) -> list[str]:
             year -= 1
         months.append(f"{year:04d}-{month:02d}")
     return months
+
+
+def portfolio_udf_check(pool: ExasolPool) -> dict[str, Any]:
+    """Score the whole book with the Exasol Python UDF and compare to the view."""
+
+    schema = settings.exasol_schema
+    result = pool.query(
+        f"""
+        SELECT
+            COUNT(*) AS customers_scored,
+            SUM(CASE WHEN ABS(u.score - v.eligibility_score) <= 0.05 THEN 1 ELSE 0 END)
+                AS matching_scores,
+            ROUND(AVG(ABS(u.score - v.eligibility_score)), 6) AS mean_abs_difference,
+            ROUND(MAX(ABS(u.score - v.eligibility_score)), 2) AS max_abs_difference,
+            SUM(CASE WHEN u.decision = v.eligibility_decision THEN 1 ELSE 0 END)
+                AS decision_matches,
+            SUM(CASE WHEN u.decision = 'APPROVED' THEN 1 ELSE 0 END) AS approved,
+            SUM(CASE WHEN u.decision = 'REFERRED' THEN 1 ELSE 0 END) AS referred,
+            SUM(CASE WHEN u.decision = 'DECLINED' THEN 1 ELSE 0 END) AS declined
+        FROM (
+            SELECT {schema}.SCORE_PORTFOLIO(
+                v.customer_id,
+                v.bureau_score,
+                v.latest_dti_ratio,
+                v.delinquencies_12m,
+                v.hard_inquiries_6m,
+                v.portfolio_utilization_ratio,
+                v.variance_ratio,
+                v.max_dpd,
+                v.collections_count,
+                v.bankruptcies
+            )
+            FROM {schema}.V_RECONCILED_CREDIT_360 v
+        ) u
+        JOIN {schema}.V_RECONCILED_CREDIT_360 v ON v.customer_id = u.customer_id_out
+        """
+    )
+    row = result.rows[0] if result.rows else {}
+    scored = _i(row, "customers_scored")
+    matches = _i(row, "matching_scores")
+    return {
+        "script": f"{schema}.SCORE_PORTFOLIO",
+        "engine": "Exasol PYTHON3 SET UDF",
+        "customers_scored": scored,
+        "matching_scores": matches,
+        "agreement_rate": round(matches / scored, 4) if scored else 0.0,
+        "mean_abs_difference": _f(row, "mean_abs_difference"),
+        "max_abs_difference": _f(row, "max_abs_difference"),
+        "decision_matches": _i(row, "decision_matches"),
+        "decision_mix": {
+            "APPROVED": _i(row, "approved"),
+            "REFERRED": _i(row, "referred"),
+            "DECLINED": _i(row, "declined"),
+        },
+        "elapsed_ms": round(result.elapsed_ms, 2),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 def get_overview(pool: ExasolPool) -> dict[str, Any]:

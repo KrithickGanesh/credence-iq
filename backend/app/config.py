@@ -23,13 +23,14 @@ class Settings(BaseSettings):
     api_port: int = 8000
     cors_origins: str = "http://localhost:3000"
 
-    exasol_host: str = "localhost"
+    exasol_host: str = "127.0.0.1"
     exasol_port: int = 8563
     exasol_user: str = "sys"
-    exasol_password: str = "exasol"
+    exasol_password: str = ""
     exasol_schema: str = "CREDENCEIQ"
-    exasol_pool_size: int = Field(default=8, ge=1, le=32)
+    exasol_pool_size: int = Field(default=3, ge=1, le=5)
     exasol_query_timeout: int = 60
+    exasol_tls_verify: bool = False
 
     llm_provider: str = "none"
     llm_model: str = ""
@@ -42,9 +43,9 @@ class Settings(BaseSettings):
     local_llm_base_url: str = "http://localhost:11434/v1"
     local_llm_api_key: str = "local"
 
-    lender_name: str = "CredenceIQ Demo Bank, N.A."
-    lender_address: str = "100 Market Street, San Francisco, CA 94105"
-    lender_phone: str = "1-800-555-0142"
+    lender_name: str = "CredenceIQ Finance Ltd."
+    lender_address: str = "Bandra Kurla Complex, Mumbai, Maharashtra 400051"
+    lender_phone: str = "+91-22-5550-0142"
     lender_email: str = "adverse.action@credenceiq.example"
 
     @field_validator("exasol_schema")

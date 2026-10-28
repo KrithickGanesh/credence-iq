@@ -29,6 +29,10 @@ def applications(
     page_size: int = Query(default=20, ge=1, le=100),
     search: str | None = Query(default=None, max_length=120),
     decision: Literal["APPROVED", "DECLINED", "REFERRED"] | None = Query(default=None),
+    eligibility_decision: Literal["APPROVED", "DECLINED", "REFERRED"] | None = Query(
+        default=None,
+        description="Filter on the decision recomputed from reconciled exposure, not the historical application decision.",
+    ),
     discrepancy_only: bool = Query(default=False),
     sort: SortField = Query(default="decision_date"),
     direction: Literal["asc", "desc"] = Query(default="desc"),
@@ -39,6 +43,7 @@ def applications(
         page_size=page_size,
         search=search,
         decision=decision,
+        eligibility_decision=eligibility_decision,
         discrepancy_only=discrepancy_only,
         sort=sort,
         direction=direction,
