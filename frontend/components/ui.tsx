@@ -161,9 +161,9 @@ export function StatCard({
   trend?: { value: string; direction: "up" | "down"; positive?: boolean };
 }) {
   return (
-    <div className="panel group relative overflow-hidden p-4 transition hover:shadow-lift sm:p-5">
+    <div className="panel group relative overflow-hidden p-4 transition hover:border-slate-300/80 sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-slate-500">
           {label}
         </p>
         {Icon && (
@@ -177,7 +177,7 @@ export function StatCard({
           </span>
         )}
       </div>
-      <p className="mt-2.5 text-[26px] font-semibold leading-none tracking-tight text-ink tabular-nums">
+      <p className="mt-2.5 text-[25px] font-semibold leading-none tracking-tight text-ink tabular-nums">
         {value}
       </p>
       {(helper || trend) && (

@@ -10,18 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         ink: "#0f172a",
-        canvas: "#f4f6f8",
+        canvas: "#f7f8fa",
         brand: {
-          50: "#ecfdf8",
-          100: "#d1faee",
-          200: "#a7f3da",
-          300: "#6ee7bf",
-          400: "#34d399",
-          500: "#10b981",
-          600: "#0f9f7a",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e4a",
+          50: "#f0f9f5",
+          100: "#dcf1e8",
+          200: "#bfe3d4",
+          300: "#93d0b9",
+          400: "#5fb899",
+          500: "#35a17e",
+          600: "#14866a",
+          700: "#0f6c58",
+          800: "#0e5749",
+          900: "#0d4a3e",
         },
         navy: {
           800: "#111c30",
@@ -31,7 +31,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "ui-sans-serif",
+          "var(--font-sans, ui-sans-serif)",
           "system-ui",
           "-apple-system",
           "Segoe UI",
@@ -41,10 +41,10 @@ const config: Config = {
           "sans-serif",
         ],
         serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
+        mono: ["var(--font-mono, ui-monospace)", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
       boxShadow: {
-        card: "0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04)",
+        card: "0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 1px rgba(15, 23, 42, 0.03)",
         lift: "0 18px 40px rgba(15, 23, 42, 0.10)",
       },
       keyframes: {

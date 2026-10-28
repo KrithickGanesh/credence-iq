@@ -732,7 +732,7 @@ function AuditWorkspace() {
         </Card>
 
         {/* Desktop detail pane */}
-        <aside className="sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card xl:block">
+        <aside className="sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card xl:block">
           {selected ? (
             <DetailPanel customerId={selected} onClose={() => setSelected(null)} />
           ) : (

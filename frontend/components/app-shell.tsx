@@ -80,18 +80,16 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     <Link
       href={item.href}
       className={cn(
-        "group flex items-start gap-3 rounded-xl px-3 py-2.5 transition",
+        "group flex items-start gap-3 rounded-lg px-3 py-2.5 transition",
         active
-          ? "bg-white/10 text-white ring-1 ring-inset ring-white/10"
-          : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100",
+          ? "bg-brand-50 text-brand-900 ring-1 ring-inset ring-brand-600/15"
+          : "text-slate-600 hover:bg-slate-50 hover:text-ink",
       )}
     >
       <span
         className={cn(
           "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
-          active
-            ? "bg-brand-500/20 text-brand-300"
-            : "bg-white/[0.04] text-slate-400 group-hover:text-slate-200",
+          active ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-500 group-hover:text-slate-700",
         )}
       >
         <Icon size={16} strokeWidth={1.9} />
@@ -101,7 +99,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
         <span
           className={cn(
             "block truncate text-[11px] leading-4",
-            active ? "text-slate-400" : "text-slate-500",
+            active ? "text-brand-700/70" : "text-slate-400",
           )}
         >
           {item.description}
@@ -115,7 +113,7 @@ function HealthPill({ health, failed }: { health: HealthResponse | null; failed:
   const online = Boolean(health && health.database === "up" && !failed);
   return (
     <div
-      className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5"
+      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5"
       title={
         online
           ? `Exasol ${health?.exasol_version ?? ""} · ${health?.ping_ms ?? 0} ms ping`
@@ -124,16 +122,16 @@ function HealthPill({ health, failed }: { health: HealthResponse | null; failed:
     >
       <span className="relative flex h-2 w-2">
         {online && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
         )}
         <span
           className={cn(
             "relative inline-flex h-2 w-2 rounded-full",
-            online ? "bg-emerald-400" : failed ? "bg-rose-400" : "bg-amber-400",
+            online ? "bg-emerald-500" : failed ? "bg-rose-500" : "bg-amber-500",
           )}
         />
       </span>
-      <span className="text-[11px] font-medium text-slate-300">
+      <span className="text-[11px] font-medium text-slate-600">
         {online ? "Exasol live" : failed ? "API offline" : "Connecting…"}
       </span>
     </div>
@@ -146,23 +144,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-[268px] flex-col bg-navy-950 px-4 pb-5 pt-6 lg:flex">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-[268px] flex-col border-r border-slate-200 bg-white px-4 pb-5 pt-6 lg:flex">
         <Link href="/" className="mb-8 flex items-center gap-3 px-2">
-          <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-700 shadow-lg shadow-brand-900/40">
-            <Activity size={20} className="text-white" strokeWidth={2.2} />
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-800 shadow-sm">
+            <Activity size={18} className="text-white" strokeWidth={2.2} />
           </span>
           <span>
-            <span className="block text-[15px] font-semibold tracking-tight text-white">
-              Credence<span className="text-brand-400">IQ</span>
+            <span className="block text-[14.5px] font-semibold tracking-tight text-ink">
+              Credence<span className="text-brand-600">IQ</span>
             </span>
-            <span className="block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            <span className="block text-[10px] uppercase tracking-[0.16em] text-slate-400">
               Risk Intelligence
             </span>
           </span>
         </Link>
 
-        <nav className="space-y-1.5">
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+        <nav className="space-y-1">
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
             Workspace
           </p>
           {NAV.map((item) => (
@@ -174,9 +172,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="mt-8 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3.5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-            <Sparkles size={13} className="text-brand-400" />
+        <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-600">
+            <Sparkles size={13} className="text-brand-600" />
             Agentic disclosure
           </div>
           <p className="mt-2 text-[11.5px] leading-5 text-slate-500">
@@ -187,23 +185,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="mt-auto space-y-3 pt-6">
           <HealthPill health={health} failed={failed} />
-          <div className="flex items-center gap-2 px-1 text-[10.5px] text-slate-600">
+          <div className="flex items-center gap-2 px-1 text-[10.5px] text-slate-500">
             <Database size={12} />
             <span className="truncate">
               {health?.schema ?? "CREDENCEIQ"} · v{health?.api_version ?? "1.0.0"}
             </span>
           </div>
-          <p className="px-1 text-[10px] leading-4 text-slate-700">
+          <p className="px-1 text-[10px] leading-4 text-slate-400">
             Synthetic demonstration data. Not for production credit decisions.
           </p>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-[268px]">
-        <header className="no-print sticky top-0 z-20 border-b border-slate-200/70 bg-canvas/85 backdrop-blur-xl lg:hidden">
+        <header className="no-print sticky top-0 z-20 border-b border-slate-200 bg-white/85 backdrop-blur-xl lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-400 to-brand-700">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-800">
                 <Activity size={16} className="text-white" />
               </span>
               <span className="text-sm font-semibold tracking-tight">
@@ -222,8 +220,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={cn(
                     "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition",
                     active
-                      ? "bg-navy-900 text-white"
-                      : "text-slate-600 hover:bg-white hover:text-ink",
+                      ? "bg-ink text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-ink",
                   )}
                 >
                   {item.label}

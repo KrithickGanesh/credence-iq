@@ -329,8 +329,8 @@ function ScoreTransition({ sim }: { sim: SimulationResponse }) {
           )}
         >
           {flat ? "No change" : improved ? <TrendingUp size={11} /> : <ArrowDownRight size={11} />}
-          {sim.score_delta > 0 ? "+" : ""}
-          {sim.score_delta.toFixed(1)}
+          {!flat && (sim.score_delta > 0 ? "+" : "")}
+          {!flat && sim.score_delta.toFixed(1)}
         </span>
       </div>
       <div className="mt-2 flex items-end gap-2">

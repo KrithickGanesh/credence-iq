@@ -24,7 +24,7 @@ import type {
   VelocityPoint,
 } from "@/lib/types";
 
-const GRID = "#eef2f6";
+const GRID = "#eef1f5";
 const AXIS = "#94a3b8";
 
 const SYSTEM_COLORS: Record<string, string> = {
@@ -34,17 +34,18 @@ const SYSTEM_COLORS: Record<string, string> = {
 };
 
 const DECISION_COLORS: Record<string, string> = {
-  APPROVED: "#0f9f7a",
+  APPROVED: "#14866a",
   DECLINED: "#dc2626",
   REFERRED: "#d97706",
 };
 
 const tooltipStyle = {
-  borderRadius: 12,
+  borderRadius: 10,
   border: "1px solid #e2e8f0",
-  boxShadow: "0 12px 30px rgba(15, 23, 42, 0.10)",
+  boxShadow: "0 4px 16px rgba(15, 23, 42, 0.08)",
   fontSize: 12,
   padding: "8px 12px",
+  background: "#ffffff",
 };
 
 export function ExposureBySystemChart({ data }: { data: ExposureSystem[] }) {
@@ -57,7 +58,7 @@ export function ExposureBySystemChart({ data }: { data: ExposureSystem[] }) {
     <div className="h-[228px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 12, bottom: 0, left: 4 }} barCategoryGap={18}>
-          <CartesianGrid stroke={GRID} horizontal={false} />
+          <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray="3 3" />
           <XAxis
             type="number"
             tickFormatter={(value: number) => compactCurrency(value)}
@@ -162,11 +163,11 @@ export function RejectionVelocityChart({ data }: { data: VelocityPoint[] }) {
         <ComposedChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
           <defs>
             <linearGradient id="velocityFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0f9f7a" stopOpacity={0.22} />
-              <stop offset="100%" stopColor="#0f9f7a" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#14866a" stopOpacity={0.18} />
+              <stop offset="100%" stopColor="#14866a" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke={GRID} vertical={false} />
+          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
           <XAxis
             dataKey="month"
             axisLine={false}
@@ -211,7 +212,7 @@ export function RejectionVelocityChart({ data }: { data: VelocityPoint[] }) {
             type="monotone"
             dataKey="applications"
             name="Applications"
-            stroke="#0f9f7a"
+            stroke="#14866a"
             strokeWidth={2}
             fill="url(#velocityFill)"
             dot={false}

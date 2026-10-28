@@ -98,7 +98,7 @@ export function statusTone(
 }
 
 export function scoreColor(score: number): string {
-  if (score >= 750) return "#0f9f7a";
+  if (score >= 750) return "#14866a";
   if (score >= 680) return "#d97706";
   return "#dc2626";
 }

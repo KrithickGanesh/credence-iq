@@ -162,65 +162,58 @@ export default function OverviewPage() {
       />
 
       {/* Headline insight ------------------------------------------------- */}
-      <section className="relative mb-4 overflow-hidden rounded-2xl bg-navy-950 p-5 text-white shadow-lift sm:p-6">
+      <section className="relative mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-card sm:p-6">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl"
+          className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-500 to-brand-700"
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl"
-        />
-        <div className="relative grid gap-5 lg:grid-cols-[1.55fr_1fr] lg:items-center">
+        <div className="grid gap-6 pl-4 lg:grid-cols-[1.55fr_1fr] lg:items-center lg:pl-5">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-600/15 bg-brand-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-800">
               <ShieldAlert size={12} />
               Cross-ledger reconciliation
             </div>
-            <h2 className="mt-3 text-balance text-xl font-semibold leading-snug tracking-tight sm:text-[22px]">
+            <h2 className="mt-3 text-balance text-xl font-semibold leading-snug tracking-tight text-ink sm:text-[22px]">
               Reported exposure overstates the book by{" "}
-              <span className="text-brand-300">{compactCurrency(portfolio.double_counted_exposure)}</span>.
+              <span className="text-brand-700">{compactCurrency(portfolio.double_counted_exposure)}</span>.
             </h2>
-            <p className="mt-2 max-w-xl text-[12.5px] leading-6 text-slate-400">
+            <p className="mt-2 max-w-xl text-[12.5px] leading-6 text-slate-500">
               Core banking, card management, and micro-lending each report the same facilities
               independently. Exasol reconciles facility-level balances across all three, then
               re-scores every applicant on the deduplicated exposure — not the inflated ledger sum.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Link href="/audit?discrepancy=1" className="btn bg-white text-navy-900 hover:bg-slate-100">
+              <Link href="/audit?discrepancy=1" className="btn-primary">
                 Inspect {number(portfolio.mismatches)} mismatches
                 <ArrowUpRight size={14} />
               </Link>
-              <Link
-                href="/studio"
-                className="btn border border-white/15 bg-white/[0.04] text-slate-200 hover:bg-white/[0.09]"
-              >
+              <Link href="/studio" className="btn-ghost">
                 Draft adverse-action notices
               </Link>
             </div>
           </div>
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10">
-            <div className="bg-navy-900/80 p-3.5">
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200">
+            <div className="bg-white p-4">
               <dt className="text-[10px] uppercase tracking-[0.12em] text-slate-500">Reported</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums">
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-ink">
                 {compactCurrency(portfolio.reported_exposure)}
               </dd>
             </div>
-            <div className="bg-navy-900/80 p-3.5">
+            <div className="bg-white p-4">
               <dt className="text-[10px] uppercase tracking-[0.12em] text-slate-500">Reconciled</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums text-brand-300">
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-brand-700">
                 {compactCurrency(portfolio.reconciled_exposure)}
               </dd>
             </div>
-            <div className="bg-navy-900/80 p-3.5">
+            <div className="bg-white p-4">
               <dt className="text-[10px] uppercase tracking-[0.12em] text-slate-500">Overstatement</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums text-amber-300">
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-amber-600">
                 {pct(doubleCountShare)}
               </dd>
             </div>
-            <div className="bg-navy-900/80 p-3.5">
+            <div className="bg-white p-4">
               <dt className="text-[10px] uppercase tracking-[0.12em] text-slate-500">Decline rate</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums">{pct(portfolio.decline_rate)}</dd>
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-ink">{pct(portfolio.decline_rate)}</dd>
             </div>
           </dl>
         </div>
