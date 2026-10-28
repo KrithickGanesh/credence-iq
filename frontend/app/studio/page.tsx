@@ -674,7 +674,7 @@ function StudioWorkspace() {
                 Live re-scoring · {sim.query_ms.toFixed(0)} ms
               </span>
               <span className="text-[11px] text-slate-400">
-                {number(sim.application_id)} · {dateTime(sim.generated_at)}
+                App {number(sim.application_id)} · re-scored {dateTime(sim.generated_at)}
               </span>
             </>
           )
