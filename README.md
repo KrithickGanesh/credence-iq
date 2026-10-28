@@ -29,6 +29,33 @@ The reference deployment is **Exasol Personal 2026.2.0** running locally (Podman
 
 ---
 
+## Screenshots
+
+Captured from the seeded 30,000-customer book, with every number queried live from Exasol.
+
+### Portfolio overview
+
+Live cross-ledger reconciliation, portfolio KPIs, in-database UDF timing, decision mix,
+rejection velocity, denial drivers, and the largest unresolved exposures.
+
+![Risk and exposure overview](docs/screenshots/overview.png)
+
+### Discrepancy & exposure audit
+
+Searchable book with historical vs. re-scored decisions, debt variance, reconciliation
+status, and an Applicant 360 drawer for factor-level inspection.
+
+![Discrepancy and exposure audit](docs/screenshots/audit.png)
+
+### Adverse-action studio
+
+Live re-scoring, path-to-approval scenarios, and the generated RBI/DPDP disclosure package
+with a plain-English companion.
+
+![Adverse action and scenario studio](docs/screenshots/studio.png)
+
+---
+
 ## Architecture
 
 ```mermaid
