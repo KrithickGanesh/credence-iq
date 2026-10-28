@@ -1,10 +1,13 @@
-"""CredenceIQ performance benchmark: legacy per-customer queries vs one Exasol pass.
+"""CredenceIQ access-pattern benchmark: per-customer N+1 vs one set-based pass.
 
-The benchmark contrasts two access patterns over the *same* data:
+Both paths run against the **same** Exasol instance and the same reconciled
+data. The comparison is about *query composition*, not about Exasol versus a
+transactional database:
 
-* **Legacy N+1** — the application issues separate round-trips for the customer,
-  bureau record, latest application, and every exposure row, then reconciles in
-  Python. This mirrors a transactional service composing an applicant view.
+* **N+1 composition** — the application issues separate round-trips for the
+  customer, bureau record, latest application, and every exposure row, then
+  reconciles in Python. This mirrors a transactional service assembling an
+  applicant view one call at a time.
 * **Single set-based query** — one Exasol query against
   ``V_RECONCILED_CREDIT_360`` returns the same reconciled profile for every
   sampled customer.
@@ -19,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import ssl
 import statistics
@@ -33,16 +37,23 @@ try:
 except ImportError:  # pragma: no cover - friendly message on a bare interpreter
     sys.exit("pyexasol is required. Install it with: pip install -r backend/requirements.txt")
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 IDENTIFIER = re.compile(r"^[A-Z_][A-Z0-9_]*$")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="localhost")
-    parser.add_argument("--port", type=int, default=8563)
-    parser.add_argument("--user", default="sys")
-    parser.add_argument("--password", default="exasol")
+    parser.add_argument("--host", default=os.getenv("EXASOL_HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.getenv("EXASOL_PORT", "8563")))
+    parser.add_argument("--user", default=os.getenv("EXASOL_USER", "sys"))
+    parser.add_argument(
+        "--password",
+        default=os.getenv("EXASOL_PASSWORD", ""),
+        help="Defaults to EXASOL_PASSWORD, then the starter-kit credential file.",
+    )
     parser.add_argument("--schema", default="CREDENCEIQ")
     parser.add_argument("--sample", type=int, default=100, help="customers in the comparison (1-1000)")
     parser.add_argument("--runs", type=int, default=3, help="measured repetitions")
@@ -54,6 +65,33 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_password(explicit: str) -> str:
+    """Prefer an explicit/env password, then the starter-kit credential file."""
+
+    if explicit.strip():
+        return explicit.strip()
+    credential = (
+        Path.home() / ".exasol-starter-kit" / "credentials" / "personal_sys_password"
+    )
+    if credential.exists():
+        return credential.read_text(encoding="utf-8").strip()
+    raise SystemExit(
+        "No Exasol password. Set EXASOL_PASSWORD in .env or pass --password."
+    )
+
+
+def inr_crore(value: float) -> str:
+    """Format a rupee amount using Indian lakh/crore units."""
+
+    crore = value / 10_000_000
+    if abs(crore) >= 100:
+        return f"₹{crore:,.0f}Cr"
+    if abs(crore) >= 1:
+        return f"₹{crore:,.2f}Cr"
+    lakh = value / 100_000
+    return f"₹{lakh:,.1f}L"
+
+
 def connect(args: argparse.Namespace) -> pyexasol.ExaConnection:
     schema = args.schema.strip().upper()
     if not IDENTIFIER.fullmatch(schema):
@@ -61,7 +99,7 @@ def connect(args: argparse.Namespace) -> pyexasol.ExaConnection:
     return pyexasol.connect(
         dsn=f"{args.host}:{args.port}",
         user=args.user,
-        password=args.password,
+        password=resolve_password(args.password),
         compression=True,
         encryption=True,
         websocket_sslopt={"cert_reqs": ssl.CERT_NONE},
@@ -94,8 +132,10 @@ def portfolio_totals(con: pyexasol.ExaConnection, schema: str) -> dict[str, Any]
     return con.execute(sql).fetchone() or {}
 
 
-def legacy_profile(con: pyexasol.ExaConnection, schema: str, customer_id: int) -> dict[str, Any]:
-    """Simulate a transactional service composing one applicant profile."""
+def n_plus_one_profile(
+    con: pyexasol.ExaConnection, schema: str, customer_id: int
+) -> dict[str, Any]:
+    """Simulate a transactional service assembling one profile with N+1 calls."""
 
     customer = con.execute(
         f"SELECT customer_id, annual_income FROM {schema}.CUSTOMERS WHERE customer_id = {{cid}}",
@@ -198,11 +238,11 @@ def main() -> None:
         )
 
         # Warm both paths once.
-        legacy_profile(con, schema, ids[0])
+        n_plus_one_profile(con, schema, ids[0])
         single_pass(con, schema, ids[: min(5, len(ids))])
 
-        legacy_ms, legacy_samples = measure(
-            lambda: [legacy_profile(con, schema, customer_id) for customer_id in ids],
+        n_plus_one_ms, n_plus_one_samples = measure(
+            lambda: [n_plus_one_profile(con, schema, customer_id) for customer_id in ids],
             runs,
         )
         one_pass_ms, one_pass_samples = measure(lambda: single_pass(con, schema, ids), runs)
@@ -212,12 +252,18 @@ def main() -> None:
 
         portfolio_ms, portfolio_samples = measure(portfolio, runs)
 
-        legacy_queries = len(ids) * 4
-        speedup = legacy_ms / one_pass_ms if one_pass_ms else float("inf")
-        reduction = 1 - (one_pass_ms / legacy_ms) if legacy_ms else 0.0
+        n_plus_one_queries = len(ids) * 4
+        reduction = 1 - (one_pass_ms / n_plus_one_ms) if n_plus_one_ms else 0.0
+        ms_saved = n_plus_one_ms - one_pass_ms
+        speedup = n_plus_one_ms / one_pass_ms if one_pass_ms else float("inf")
 
         result = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            "benchmark": "per-customer N+1 composition vs single set-based pass",
+            "note": (
+                "Both paths use the same Exasol instance and data. The result measures "
+                "query composition and round-trips, not Exasol versus another engine."
+            ),
             "exasol_version": version,
             "schema": schema,
             "sample_customers": len(ids),
@@ -225,11 +271,11 @@ def main() -> None:
             "portfolio_customers": int(totals.get("customers") or 0),
             "portfolio_gross_exposure": float(totals.get("gross_exposure") or 0),
             "portfolio_reconciled_exposure": float(totals.get("reconciled_exposure") or 0),
-            "legacy": {
-                "round_trips": legacy_queries,
-                "median_ms": round(legacy_ms, 2),
-                "samples_ms": [round(value, 2) for value in legacy_samples],
-                "ms_per_customer": round(legacy_ms / len(ids), 2),
+            "n_plus_one": {
+                "round_trips": n_plus_one_queries,
+                "median_ms": round(n_plus_one_ms, 2),
+                "samples_ms": [round(value, 2) for value in n_plus_one_samples],
+                "ms_per_customer": round(n_plus_one_ms / len(ids), 2),
             },
             "single_pass": {
                 "round_trips": 1,
@@ -241,26 +287,34 @@ def main() -> None:
                 "median_ms": round(portfolio_ms, 2),
                 "samples_ms": [round(value, 2) for value in portfolio_samples],
             },
-            "speedup_x": round(speedup, 1),
-            "latency_reduction_pct": round(reduction * 100, 1),
+            "wall_time_reduction_pct": round(reduction * 100, 1),
+            "median_ms_saved": round(ms_saved, 2),
+            "ratio_x": round(speedup, 1),
         }
 
-        print(f"{'Path':<34}{'Round-trips':>13}{'Median ms':>12}{'ms/customer':>14}")
-        print("-" * 73)
+        print(f"{'Path':<36}{'Round-trips':>13}{'Median ms':>12}{'ms/customer':>14}")
+        print("-" * 75)
         print(
-            f"{'Legacy per-customer composition':<34}{legacy_queries:>13,}"
-            f"{legacy_ms:>12,.1f}{legacy_ms / len(ids):>14,.1f}"
+            f"{'Per-customer N+1 composition':<36}{n_plus_one_queries:>13,}"
+            f"{n_plus_one_ms:>12,.1f}{n_plus_one_ms / len(ids):>14,.1f}"
         )
         print(
-            f"{'Single Exasol credit-360 pass':<34}{1:>13,}"
+            f"{'Single set-based credit-360 pass':<36}{1:>13,}"
             f"{one_pass_ms:>12,.1f}{one_pass_ms / len(ids):>14,.1f}"
         )
-        print(f"{'Portfolio aggregate scan':<34}{1:>13,}{portfolio_ms:>12,.1f}{'n/a':>14}")
-        print("-" * 73)
-        print(f"Speedup: {speedup:,.1f}x fewer wall-clock ms ({reduction * 100:.1f}% lower latency)")
+        print(f"{'Portfolio aggregate scan':<36}{1:>13,}{portfolio_ms:>12,.1f}{'n/a':>14}")
+        print("-" * 75)
         print(
-            f"Reconciled exposure: ${float(totals.get('reconciled_exposure') or 0):,.0f} "
-            f"vs ${float(totals.get('gross_exposure') or 0):,.0f} reported"
+            f"N+1 -> single pass: {ms_saved:,.1f} ms less wall time "
+            f"({reduction * 100:.1f}% lower) at the same result."
+        )
+        print(
+            "Both paths run on the same Exasol instance; this measures query composition, "
+            "not engine speed."
+        )
+        print(
+            f"Reconciled exposure: {inr_crore(float(totals.get('reconciled_exposure') or 0))} "
+            f"vs {inr_crore(float(totals.get('gross_exposure') or 0))} reported"
         )
 
         output = Path(args.json) if args.json else (
