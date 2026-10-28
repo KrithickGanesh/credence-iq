@@ -29,8 +29,10 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 import numpy as np
+from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
 
 # The scoring module is shared with the API.  Locally the package lives under
 # backend/, while the Docker image places it at /app/app.
@@ -39,6 +41,7 @@ try:  # pragma: no cover - import path depends on how the script is launched
         FACTOR_DEFINITIONS,
         approval_threshold,
         build_score_sql,
+        build_score_udf,
         decision_for,
         default_weights,
         grade_for,
@@ -50,6 +53,7 @@ except ModuleNotFoundError:  # pragma: no cover
         FACTOR_DEFINITIONS,
         approval_threshold,
         build_score_sql,
+        build_score_udf,
         decision_for,
         default_weights,
         grade_for,
@@ -60,6 +64,128 @@ from faker import Faker
 
 SCHEMA_DEFAULT = os.getenv("EXASOL_SCHEMA", "CREDENCEIQ")
 SYSTEMS = ("CORE_BANKING", "CARD_ENGINE", "MICROCREDIT")
+
+# City/state pairs keep the synthetic Indian addresses internally consistent.
+# Faker's en_IN locale picks a city and a state independently, which produces
+# implausible combinations (for example "Gudivada, Madhya Pradesh").
+CITY_STATE_PAIRS: list[tuple[str, str]] = [
+    ("Mumbai", "Maharashtra"),
+    ("Pune", "Maharashtra"),
+    ("Nagpur", "Maharashtra"),
+    ("Nashik", "Maharashtra"),
+    ("Vasai-Virar", "Maharashtra"),
+    ("Thane", "Maharashtra"),
+    ("New Delhi", "Delhi"),
+    ("Delhi", "Delhi"),
+    ("Gurugram", "Haryana"),
+    ("Faridabad", "Haryana"),
+    ("Panchkula", "Haryana"),
+    ("Noida", "Uttar Pradesh"),
+    ("Lucknow", "Uttar Pradesh"),
+    ("Kanpur", "Uttar Pradesh"),
+    ("Varanasi", "Uttar Pradesh"),
+    ("Agra", "Uttar Pradesh"),
+    ("Moradabad", "Uttar Pradesh"),
+    ("Bulandshahr", "Uttar Pradesh"),
+    ("Jaipur", "Rajasthan"),
+    ("Jodhpur", "Rajasthan"),
+    ("Udaipur", "Rajasthan"),
+    ("Kota", "Rajasthan"),
+    ("Ahmedabad", "Gujarat"),
+    ("Surat", "Gujarat"),
+    ("Vadodara", "Gujarat"),
+    ("Rajkot", "Gujarat"),
+    ("Bhavnagar", "Gujarat"),
+    ("Bengaluru", "Karnataka"),
+    ("Mysuru", "Karnataka"),
+    ("Hubballi", "Karnataka"),
+    ("Davanagere", "Karnataka"),
+    ("Raichur", "Karnataka"),
+    ("Bidar", "Karnataka"),
+    ("Hyderabad", "Telangana"),
+    ("Warangal", "Telangana"),
+    ("Nizamabad", "Telangana"),
+    ("Vijayawada", "Andhra Pradesh"),
+    ("Visakhapatnam", "Andhra Pradesh"),
+    ("Guntur", "Andhra Pradesh"),
+    ("Gudivada", "Andhra Pradesh"),
+    ("Tirupati", "Andhra Pradesh"),
+    ("Nellore", "Andhra Pradesh"),
+    ("Kakinada", "Andhra Pradesh"),
+    ("Ongole", "Andhra Pradesh"),
+    ("Narasaraopet", "Andhra Pradesh"),
+    ("Chennai", "Tamil Nadu"),
+    ("Coimbatore", "Tamil Nadu"),
+    ("Madurai", "Tamil Nadu"),
+    ("Tiruppur", "Tamil Nadu"),
+    ("Nagercoil", "Tamil Nadu"),
+    ("Kolkata", "West Bengal"),
+    ("Howrah", "West Bengal"),
+    ("Durgapur", "West Bengal"),
+    ("Asansol", "West Bengal"),
+    ("Siliguri", "West Bengal"),
+    ("Naihati", "West Bengal"),
+    ("Haldia", "West Bengal"),
+    ("Bally", "West Bengal"),
+    ("Patna", "Bihar"),
+    ("Gaya", "Bihar"),
+    ("Bhagalpur", "Bihar"),
+    ("Muzaffarpur", "Bihar"),
+    ("Darbhanga", "Bihar"),
+    ("Arrah", "Bihar"),
+    ("Katihar", "Bihar"),
+    ("Saharsa", "Bihar"),
+    ("Siwan", "Bihar"),
+    ("Ranchi", "Jharkhand"),
+    ("Jamshedpur", "Jharkhand"),
+    ("Dhanbad", "Jharkhand"),
+    ("Rourkela", "Odisha"),
+    ("Bhubaneswar", "Odisha"),
+    ("Cuttack", "Odisha"),
+    ("Raipur", "Chhattisgarh"),
+    ("Bhopal", "Madhya Pradesh"),
+    ("Indore", "Madhya Pradesh"),
+    ("Jabalpur", "Madhya Pradesh"),
+    ("Rewa", "Madhya Pradesh"),
+    ("Gwalior", "Madhya Pradesh"),
+    ("Chandigarh", "Chandigarh"),
+    ("Ludhiana", "Punjab"),
+    ("Amritsar", "Punjab"),
+    ("Patiala", "Punjab"),
+    ("Jalandhar", "Punjab"),
+    ("Dehradun", "Uttarakhand"),
+    ("Shimla", "Himachal Pradesh"),
+    ("Jammu", "Jammu and Kashmir"),
+    ("Srinagar", "Jammu and Kashmir"),
+    ("Guwahati", "Assam"),
+    ("Dibrugarh", "Assam"),
+    ("Bongaigaon", "Assam"),
+    ("Aizawl", "Mizoram"),
+    ("Agartala", "Tripura"),
+    ("Imphal", "Manipur"),
+    ("Shillong", "Meghalaya"),
+    ("Kochi", "Kerala"),
+    ("Thiruvananthapuram", "Kerala"),
+    ("Kozhikode", "Kerala"),
+    ("Thrissur", "Kerala"),
+    ("Panaji", "Goa"),
+    ("Puducherry", "Puducherry"),
+    ("Aurangabad", "Maharashtra"),
+    ("Kolhapur", "Maharashtra"),
+    ("Solapur", "Maharashtra"),
+    ("Nanded", "Maharashtra"),
+    ("Akola", "Maharashtra"),
+    ("Bhusawal", "Maharashtra"),
+    ("Kalyan-Dombivli", "Maharashtra"),
+    ("Avadi", "Tamil Nadu"),
+    ("Hosur", "Tamil Nadu"),
+    ("Dhule", "Maharashtra"),
+    ("Phusro", "Jharkhand"),
+    ("Mango", "Jharkhand"),
+    ("Farrukhabad", "Uttar Pradesh"),
+    ("Shahjahanpur", "Uttar Pradesh"),
+    ("Bareilly", "Uttar Pradesh"),
+]
 SYSTEM_LABELS = {
     "CORE_BANKING": "Core Banking",
     "CARD_ENGINE": "Card Engine",
@@ -76,7 +202,7 @@ DDL_STATEMENTS = [
         PHONE               VARCHAR(40)   NOT NULL,
         DATE_OF_BIRTH       DATE          NOT NULL,
         CITY                VARCHAR(80)   NOT NULL,
-        STATE_CODE          VARCHAR(2)    NOT NULL,
+        STATE_CODE          VARCHAR(40)   NOT NULL,
         POSTAL_CODE         VARCHAR(12)   NOT NULL,
         EMPLOYMENT_STATUS   VARCHAR(30)   NOT NULL,
         ANNUAL_INCOME       DECIMAL(14,2) NOT NULL,
@@ -224,7 +350,7 @@ class DataFactory:
         self.seed = seed
         self.random = random.Random(seed)
         self.np = np.random.default_rng(seed)
-        self.fake = Faker("en_US")
+        self.fake = Faker("en_IN")
         Faker.seed(seed)
         self.today = _now()
         self.weights = default_weights()
@@ -238,9 +364,9 @@ class DataFactory:
         self._application_seq = 0
         self._customers_built = False
         self._income = np.clip(
-            self.np.lognormal(mean=math.log(85000), sigma=0.48, size=customers),
-            26000,
-            480000,
+            self.np.lognormal(mean=math.log(1_200_000), sigma=0.55, size=customers),
+            300_000,
+            10_000_000,
         )
         self._risk = np.clip(self.np.normal(0, 1, size=customers), -3.0, 2.5)
         self._customers: list[dict[str, Any]] = []
@@ -267,9 +393,9 @@ class DataFactory:
             first = fake.first_name()
             last = fake.last_name()
             income = float(round(self._income[index] / 100.0) * 100.0)
-            if income >= 200_000:
+            if income >= 2_500_000:
                 segment = "AFFLUENT"
-            elif income >= 110_000:
+            elif income >= 1_000_000:
                 segment = "PRIME"
             elif rng.random() < 0.08:
                 segment = "SME"
@@ -278,17 +404,18 @@ class DataFactory:
             kyc_roll = rng.random()
             kyc = "VERIFIED" if kyc_roll < 0.91 else ("PENDING" if kyc_roll < 0.97 else "ENHANCED")
             email_name = "".join(ch for ch in f"{first}.{last}" if ch.isalnum() or ch in "._").lower()
+            city, state = rng.choice(CITY_STATE_PAIRS)
             self._customers.append(
                 {
                     "customer_id": customer_id,
                     "first_name": first[:60],
                     "last_name": last[:60],
                     "email": f"{email_name}{customer_id}@example.com"[:160],
-                    "phone": fake.numerify("+1-###-###-####"),
+                    "phone": fake.numerify("+91-9####-#####"),
                     "date_of_birth": fake.date_of_birth(minimum_age=21, maximum_age=72),
-                    "city": fake.city()[:80],
-                    "state": fake.state_abbr(),
-                    "postal_code": fake.zipcode()[:12],
+                    "city": city,
+                    "state": state,
+                    "postal_code": fake.postcode()[:12],
                     "employment_status": rng.choice(employment),
                     "annual_income": income,
                     "kyc_status": kyc,
@@ -344,12 +471,12 @@ class DataFactory:
             - 18 * stressed
             + rng.gauss(0, 18)
         )
-        bureau_score = int(_clamp(round(score), 420, 830))
+        bureau_score = int(_clamp(round(score), 350, 900))
         self._bureau_seq += 1
         return {
             "bureau_record_id": 500_001 + self._bureau_seq - 1,
             "customer_id": customer["customer_id"],
-            "bureau_name": rng.choice(["EXPERIAN", "EQUIFAX", "TRANSUNION"]),
+            "bureau_name": rng.choice(["CIBIL", "EXPERIAN", "EQUIFAX", "CRIF"]),
             "report_date": self.today - timedelta(days=rng.randint(0, 42)),
             "bureau_score": bureau_score,
             "delinquencies_12m": int(delinquency_12m),
@@ -432,8 +559,8 @@ class DataFactory:
                     "facility_ref": facility_ref,
                     "account_ref": f"{source[:4]}-{cid}-{len(rows) + 1:02d}",
                     "product_type": product,
-                    "outstanding_balance": _money(max(25.0, balance)),
-                    "sanctioned_limit": _money(max(100.0, limit)),
+                    "outstanding_balance": _money(max(500.0, balance)),
+                    "sanctioned_limit": _money(max(1_000.0, limit)),
                     "days_past_due": int(dpd),
                     "account_status": acct_status,
                     "last_reported_date": last_reported,
@@ -443,7 +570,7 @@ class DataFactory:
         add_row(
             "CORE_BANKING",
             f"CORE-{cid}-01",
-            rng.choice(["PERSONAL_LOAN", "AUTO_LOAN", "HOME_LOAN", "BUSINESS_LOAN"]),
+            rng.choice(["PERSONAL_LOAN", "AUTO_LOAN", "HOME_LOAN", "BUSINESS_LOAN", "GOLD_LOAN"]),
             core_balance,
             core_limit,
             base_dpd,
@@ -457,8 +584,8 @@ class DataFactory:
                 "CARD_ENGINE",
                 f"CARD-{cid}-{card_number:02d}",
                 rng.choice(["CREDIT_CARD", "CHARGE_CARD"]),
-                max(25.0, card_balance * share),
-                max(250.0, card_limit * share),
+                max(500.0, card_balance * share),
+                max(2_500.0, card_limit * share),
                 base_dpd if card_number == 1 else 0,
                 status if card_number == 1 else "CURRENT",
                 self.today - timedelta(days=rng.randint(0, 12)),
@@ -488,7 +615,7 @@ class DataFactory:
                 "MICROCREDIT": "CARD_ENGINE",
             }[original["source_system"]]
             multiplier = rng.uniform(1.05, 1.30) if rng.random() < 0.72 else rng.uniform(0.70, 0.95)
-            balance = max(25.0, float(original["outstanding_balance"]) * multiplier)
+            balance = max(500.0, float(original["outstanding_balance"]) * multiplier)
             limit = max(balance * 1.02, float(original["sanctioned_limit"]) * rng.uniform(0.85, 1.18))
             add_row(
                 target,
@@ -580,16 +707,16 @@ class DataFactory:
                 low, high = age_windows[min(index, len(age_windows) - 1)]
                 app_date = today - timedelta(days=rng.randint(low, high))
                 product = rng.choices(
-                    ["PERSONAL_LOAN", "AUTO_LOAN", "CREDIT_CARD", "MICRO_LOAN", "HOME_LOAN"],
-                    weights=[38, 18, 22, 14, 8],
+                    ["PERSONAL_LOAN", "AUTO_LOAN", "CREDIT_CARD", "MICRO_LOAN", "HOME_LOAN", "GOLD_LOAN"],
+                    weights=[36, 18, 20, 14, 7, 5],
                     k=1,
                 )[0]
                 requested = _money(
                     _clamp(
                         float(customer["annual_income"]) * rng.uniform(0.04, 0.55)
                         * (1.25 if rng.random() < 0.18 else 1.0),
-                        1_000,
-                        180_000,
+                        25_000,
+                        5_000_000,
                     )
                 )
                 tenure = rng.choice([12, 18, 24, 36, 48, 60, 72, 84])
@@ -612,10 +739,10 @@ class DataFactory:
                 }
                 result = score_metrics(metrics, self.weights)
                 noisy_score = round(
-                    _clamp(result.score + rng.gauss(0, 13), 300, 850), 1
+                    _clamp(result.score + rng.gauss(0, 13), 300, 900), 1
                 )
                 decision = decision_for(noisy_score, self.weights)
-                if 655 <= noisy_score <= 700 and rng.random() < 0.38:
+                if 740 <= noisy_score <= 780 and rng.random() < 0.38:
                     decision = "REFERRED"
                 grade = grade_for(noisy_score, self.weights)
 
@@ -657,7 +784,7 @@ class DataFactory:
                         [
                             "DEBT_CONSOLIDATION",
                             "WORKING_CAPITAL",
-                            "HOME_IMPROVEMENT",
+                            "HOME_RENOVATION",
                             "MEDICAL",
                             "VEHICLE",
                             "EDUCATION",
@@ -722,14 +849,16 @@ class DataFactory:
 def _connect(args: argparse.Namespace):
     import pyexasol
 
+    verify_tls = args.tls_verify
     return pyexasol.connect(
         dsn=f"{args.host}:{args.port}",
         user=args.user,
         password=args.password,
         compression=True,
         encryption=True,
-        # Exasol Personal uses a self-signed TLS certificate.
-        websocket_sslopt={"cert_reqs": ssl.CERT_NONE},
+        # Exasol Personal ships a self-signed local certificate by default.
+        # Set EXASOL_TLS_VERIFY=true when connecting to a CA-signed endpoint.
+        websocket_sslopt={"cert_reqs": ssl.CERT_REQUIRED if verify_tls else ssl.CERT_NONE},
         fetch_dict=True,
         lower_ident=True,
         connection_timeout=20,
@@ -753,6 +882,7 @@ def _create_schema_and_tables(con, schema: str, reset: bool) -> None:
     if reset:
         print("  dropping existing objects ...", flush=True)
         con.execute(f"DROP VIEW IF EXISTS {schema}.V_RECONCILED_CREDIT_360")
+        con.execute(f"DROP SCRIPT IF EXISTS {schema}.SCORE_PORTFOLIO")
         for table in (
             "ADVERSE_ACTION_REPORTS",
             "APPLICATION_RISK_FACTORS",
@@ -973,11 +1103,17 @@ def _print_summary(factory: DataFactory, app_count: int, factor_count: int, elap
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Seed CredenceIQ into Exasol Personal")
-    parser.add_argument("--host", default=os.getenv("EXASOL_HOST", "localhost"))
+    parser.add_argument("--host", default=os.getenv("EXASOL_HOST", "127.0.0.1"))
     parser.add_argument("--port", type=int, default=int(os.getenv("EXASOL_PORT", "8563")))
     parser.add_argument("--user", default=os.getenv("EXASOL_USER", "sys"))
-    parser.add_argument("--password", default=os.getenv("EXASOL_PASSWORD", "exasol"))
+    parser.add_argument("--password", default=os.getenv("EXASOL_PASSWORD", ""))
     parser.add_argument("--schema", default=SCHEMA_DEFAULT)
+    parser.add_argument(
+        "--tls-verify",
+        action="store_true",
+        default=os.getenv("EXASOL_TLS_VERIFY", "false").lower() in {"1", "true", "yes"},
+        help="verify the Exasol TLS certificate (off by default for local Personal)",
+    )
     parser.add_argument("--customers", type=int, default=int(os.getenv("SEED_CUSTOMERS", "30000")))
     parser.add_argument("--seed", type=int, default=int(os.getenv("SEED_RANDOM_SEED", "42")))
     parser.add_argument("--reset", action="store_true", help="drop and rebuild all objects")
@@ -1020,6 +1156,13 @@ def main(argv: list[str] | None = None) -> int:
         print("\n  Dry run only - no database connection was opened.")
         return 0
 
+    if not args.password:
+        parser.error(
+            "EXASOL_PASSWORD is empty. Put the Personal credentials in .env "
+            "(see .env.example) or pass --password."
+        )
+
+    print(f"  connecting to Exasol Personal at {args.host}:{args.port} ...", flush=True)
     con = _connect(args)
     try:
         existing = _count_existing(con, args.schema)
@@ -1065,6 +1208,11 @@ def main(argv: list[str] | None = None) -> int:
         view_started = time.perf_counter()
         con.execute(_view_sql(args.schema))
         print(f"  v_reconciled_credit_360 created in {time.perf_counter() - view_started:.2f}s")
+
+        print("  installing in-database scoring UDF ...", flush=True)
+        udf_started = time.perf_counter()
+        con.execute(build_score_udf(default_weights(), schema=args.schema))
+        print(f"  score_portfolio UDF created in {time.perf_counter() - udf_started:.2f}s")
 
         row = con.execute(
             f"SELECT COUNT(*) AS CUSTOMERS, "
