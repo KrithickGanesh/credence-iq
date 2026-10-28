@@ -639,7 +639,7 @@ function AuditWorkspace() {
         </div>
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_440px]">
+      <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_420px]">
         {/* Master list */}
         <Card className="overflow-hidden">
           {error ? (
@@ -675,7 +675,7 @@ function AuditWorkspace() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] border-collapse text-left">
+                <table className="w-full min-w-[720px] border-collapse text-left">
                   <thead>
                     <tr className="table-head">
                       <th className="px-4 py-2.5 font-semibold">Applicant</th>
@@ -732,7 +732,7 @@ function AuditWorkspace() {
         </Card>
 
         {/* Desktop detail pane */}
-        <aside className="sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card xl:block">
+        <aside className="sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card 2xl:block">
           {selected ? (
             <DetailPanel customerId={selected} onClose={() => setSelected(null)} />
           ) : (
@@ -755,7 +755,7 @@ function AuditWorkspace() {
 
       {/* Mobile drawer */}
       {selected && (
-        <div className="fixed inset-0 z-40 xl:hidden">
+        <div className="fixed inset-0 z-40 2xl:hidden">
           <button
             type="button"
             aria-label="Close detail overlay"

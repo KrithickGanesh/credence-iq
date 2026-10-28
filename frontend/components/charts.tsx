@@ -27,10 +27,10 @@ import type {
 const GRID = "#eef1f5";
 const AXIS = "#94a3b8";
 
-const SYSTEM_COLORS: Record<string, string> = {
-  CORE: "#4f46e5",
-  CARDS: "#0ea5e9",
-  MICRO: "#f59e0b",
+export const SYSTEM_COLORS: Record<string, string> = {
+  CORE_BANKING: "#4f46e5",
+  CARD_ENGINE: "#0ea5e9",
+  MICROCREDIT: "#f59e0b",
 };
 
 const DECISION_COLORS: Record<string, string> = {
@@ -85,7 +85,7 @@ export function ExposureBySystemChart({ data }: { data: ExposureSystem[] }) {
               ];
             }}
           />
-          <Bar dataKey="exposure" radius={[0, 6, 6, 0]} maxBarSize={30}>
+          <Bar dataKey="exposure" radius={[0, 6, 6, 0]} maxBarSize={30} isAnimationActive={false}>
             {rows.map((row) => (
               <Cell key={row.system} fill={SYSTEM_COLORS[row.system] ?? "#64748b"} />
             ))}
@@ -116,6 +116,7 @@ export function DecisionMixChart({ data }: { data: DecisionSlice[] }) {
               paddingAngle={2}
               stroke="#ffffff"
               strokeWidth={2}
+              isAnimationActive={false}
             >
               {rows.map((row) => (
                 <Cell key={row.decision} fill={DECISION_COLORS[row.decision] ?? "#64748b"} />
@@ -214,6 +215,7 @@ export function RejectionVelocityChart({ data }: { data: VelocityPoint[] }) {
             name="Applications"
             stroke="#14866a"
             strokeWidth={2}
+            isAnimationActive={false}
             fill="url(#velocityFill)"
             dot={false}
             activeDot={{ r: 3.5 }}
@@ -227,6 +229,7 @@ export function RejectionVelocityChart({ data }: { data: VelocityPoint[] }) {
             strokeWidth={1.6}
             strokeDasharray="4 3"
             dot={false}
+            isAnimationActive={false}
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -265,7 +268,7 @@ export function DenialDriversChart({ data }: { data: DenialDriver[] }) {
               ];
             }}
           />
-          <Bar dataKey="count" radius={[0, 5, 5, 0]} fill="#dc2626" fillOpacity={0.82} maxBarSize={18} />
+          <Bar dataKey="count" radius={[0, 5, 5, 0]} fill="#dc2626" fillOpacity={0.82} maxBarSize={18} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
     </div>

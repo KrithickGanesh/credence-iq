@@ -21,7 +21,7 @@ import { api } from "@/lib/api";
 import { cn, compactCurrency, currency, dateTime, number, pct } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { OverviewResponse, UdfScoringResponse } from "@/lib/types";
-import { DecisionMixChart, DenialDriversChart, ExposureBySystemChart, RejectionVelocityChart } from "@/components/charts";
+import { DecisionMixChart, DenialDriversChart, ExposureBySystemChart, RejectionVelocityChart, SYSTEM_COLORS } from "@/components/charts";
 import {
   Badge,
   Card,
@@ -325,12 +325,7 @@ export default function OverviewPage() {
                 <span
                   className="h-2 w-2 rounded-full"
                   style={{
-                    background:
-                      system.system === "CORE"
-                        ? "#4f46e5"
-                        : system.system === "CARDS"
-                          ? "#0ea5e9"
-                          : "#f59e0b",
+                    background: SYSTEM_COLORS[system.system] ?? "#64748b",
                   }}
                 />
                 <span className="text-[11px] text-slate-600">
