@@ -575,6 +575,10 @@ npm run typecheck
 npm run build
 ```
 
+`next build` and `next dev` share the `.next` directory, so running a production build
+while the dev server is up leaves the dev server serving stale manifests. Stop `npm run dev`,
+delete `frontend/.next`, and start it again if pages come up unstyled or stuck on a skeleton.
+
 End-to-end checks used for this README: `/api/health`, `/api/scoring/udf`, applicant
 129798 reconciliation and simulation, and adverse-action generation in both tones.
 
