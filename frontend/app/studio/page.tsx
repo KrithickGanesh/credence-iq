@@ -642,6 +642,7 @@ function StudioWorkspace() {
 
   const approved = sim?.current.decision === "APPROVED";
   const banner = sim ? DECISION_BANNER[sim.current.decision] : null;
+  const projectedShift = sim !== null && sim.simulated.decision !== sim.current.decision;
 
   return (
     <>
@@ -735,7 +736,19 @@ function StudioWorkspace() {
       {banner && (
         <div className={cn("mb-4 flex items-start gap-2 rounded-xl border px-3.5 py-2.5 text-[11.5px] leading-5", banner.tone)}>
           <Info size={14} className="mt-0.5 shrink-0" />
-          <span>{banner.label}</span>
+          <span>
+            {banner.label}
+            {projectedShift && (
+              <>
+                {" "}
+                <span className="font-medium">
+                  Projected scenario: {titleCase(sim.simulated.decision)} at{" "}
+                  {sim.simulated.score.toFixed(1)}. The notice remains tied to the current
+                  decision.
+                </span>
+              </>
+            )}
+          </span>
         </div>
       )}
 
