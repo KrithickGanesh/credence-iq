@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280, initial-scale=1" />
+<title>CredenceIQ — Pitch deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0f172a;
+    --slate: #475569;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --line: #e2e8f0;
+    --soft: #f1f5f9;
+    --canvas: #f7f8fa;
+    --brand: #14866a;
+    --brand-700: #0f6c58;
+    --brand-800: #0e5749;
+    --brand-soft: #edf9f4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: var(--ink);
+    font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  @page { size: 13.333in 7.5in; margin: 0; }
+
+  .deck { width: 1280px; margin: 0 auto; }
+
+  .slide {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: #fff;
+    padding: 52px 64px 56px;
+    break-after: page;
+    page-break-after: always;
+  }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+
+  @media screen {
+    body { background: #e9edf2; padding: 28px 0; }
+    .slide { margin: 0 auto 26px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16); border-radius: 6px; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .deck { width: 1280px; }
+    .slide { margin: 0; box-shadow: none; border-radius: 0; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+
+  /* ---------- shared ---------- */
+  .brand { display: inline-flex; align-items: center; gap: 11px; }
+  .mark {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(140deg, #1aa17f 0%, #0f6c58 70%, #0e5749 100%);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(20, 134, 106, 0.28);
+    flex: none;
+  }
+  .mark svg { width: 20px; height: 20px; }
+  .brand-name { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+  .brand-name span { color: var(--brand); }
+  .brand-sub { display: block; margin-top: 1px; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+
+  .kicker { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-700); }
+  h1, h2, h3, p { margin: 0; }
+  .title { margin-top: 10px; font-size: 40px; line-height: 1.13; letter-spacing: -0.035em; font-weight: 600; max-width: 1000px; }
+  .title em { font-style: normal; color: var(--brand-700); }
+  .lede { margin-top: 14px; font-size: 16px; line-height: 1.65; color: var(--slate); max-width: 780px; }
+  .small { font-size: 11.5px; line-height: 1.55; color: var(--muted); }
+  .mono { font-family: "JetBrains Mono", Consolas, monospace; }
+
+  .footer {
+    position: absolute; left: 64px; right: 64px; bottom: 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 1px solid var(--line);
+    font-size: 9.5px; color: var(--faint); letter-spacing: 0.01em;
+  }
+  .footer strong { color: var(--slate); font-weight: 500; }
+  .pageno { font-variant-numeric: tabular-nums; color: var(--faint); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: #fff;
+    font-size: 10px; font-weight: 500; color: var(--slate);
+    white-space: nowrap;
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--brand); }
+  .pill.green { background: var(--brand-soft); border-color: rgba(20, 134, 106, 0.18); color: var(--brand-800); }
+  .pill.amber { background: var(--amber-soft); border-color: #fde68a; color: #92400e; }
+
+  .grid { display: grid; }
+
+  /* ---------- cover ---------- */
+  .cover { background: linear-gradient(145deg, #ffffff 0%, #fbfcfd 55%, #f2f7f5 100%); padding: 0; }
+  .cover-grid { display: grid; grid-template-columns: 620px 1fr; height: 100%; }
+  .cover-left { padding: 54px 0 40px 64px; display: flex; flex-direction: column; position: relative; z-index: 2; }
+  .cover .title { margin-top: 46px; font-size: 64px; line-height: 0.99; letter-spacing: -0.05em; font-weight: 600; }
+  .cover .lede { margin-top: 22px; max-width: 510px; font-size: 15.5px; line-height: 1.68; }
+  .cover-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 24px; max-width: 520px; }
+  .cover-foot { margin-top: auto; display: flex; align-items: center; gap: 10px; font-size: 10.5px; color: var(--muted); }
+  .cover-foot .mono { font-size: 10px; color: var(--slate); }
+
+  .cover-right { position: relative; padding: 46px 44px 0 0; }
+  .cover-glow {
+    position: absolute; right: -120px; top: -100px; width: 560px; height: 560px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(20, 134, 106, 0.14), rgba(20, 134, 106, 0) 68%);
+    filter: blur(6px);
+  }
+  .browser {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    box-shadow: 0 26px 60px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+  .browser-bar { height: 28px; display: flex; align-items: center; gap: 5px; padding: 0 12px; border-bottom: 1px solid #eef2f6; background: #fbfcfd; }
+  .browser-bar i { width: 6px; height: 6px; border-radius: 50%; background: #dbe2ea; display: block; }
+  .browser-bar em { margin-left: 8px; font-style: normal; font-size: 8.5px; color: var(--faint); }
+  .cover-browser { position: relative; z-index: 1; width: 100%; height: 560px; }
+  .cover-browser img { width: 100%; height: calc(100% - 28px); object-fit: cover; object-position: top center; display: block; }
+  .cover-float {
+    position: absolute; z-index: 2; left: 8px; bottom: 8px;
+    background: #fff; border: 1px solid var(--line); border-radius: 11px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16); padding: 12px 15px; width: 224px;
+  }
+  .cover-float .num { font-size: 24px; font-weight: 600; letter-spacing: -0.04em; }
+  .cover-float .lbl { margin-top: 2px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .cover-float .sub { margin-top: 7px; font-size: 9.5px; color: var(--muted); line-height: 1.4; }
+
+  /* ---------- problem ---------- */
+  .problem-grid { display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 48px; margin-top: 32px; }
+  .reason { display: flex; gap: 15px; padding: 15px 0; border-top: 1px solid var(--line); }
+  .reason:first-child { border-top: 0; padding-top: 0; }
+  .reason .n {
+    width: 27px; height: 27px; flex: none; border-radius: 8px; background: var(--soft); color: var(--slate);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .reason h3 { font-size: 15.5px; font-weight: 600; letter-spacing: -0.015em; }
+  .reason p { margin-top: 4px; font-size: 12.5px; line-height: 1.6; color: var(--muted); max-width: 500px; }
+  .stat-stack { display: grid; gap: 11px; }
+  .stat {
+    border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px; background: #fff;
+  }
+  .stat .v { font-size: 33px; line-height: 1; font-weight: 600; letter-spacing: -0.04em; }
+  .stat .k { margin-top: 7px; font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .stat .d { margin-top: 5px; font-size: 11px; line-height: 1.5; color: var(--muted); }
+  .stat.green { background: var(--brand-soft); border-color: rgba(20, 134, 106, 0.16); }
+  .stat.green .v { color: var(--brand-700); }
+  .source { margin-top: 18px; font-size: 9px; color: var(--faint); }
+
+  /* ---------- solution ---------- */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 34px; }
+  .step {
+    border: 1px solid var(--line); border-radius: 13px; padding: 24px 22px 22px; background: #fff;
+    position: relative; overflow: hidden;
+  }
+  .step:before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--brand); opacity: 0.85; }
+  .step .no { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--brand-700); font-weight: 600; }
+  .step h3 { margin-top: 14px; font-size: 19px; letter-spacing: -0.02em; }
+  .step p { margin-top: 9px; font-size: 13px; line-height: 1.65; color: var(--muted); }
+  .step code { font-family: "JetBrains Mono", monospace; font-size: 10px; background: var(--soft); padding: 2px 5px; border-radius: 4px; color: var(--slate); }
+  .callout {
+    margin-top: 20px; display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+    border: 1px solid rgba(20, 134, 106, 0.18); border-radius: 10px; background: var(--brand-soft);
+    font-size: 11.5px; color: var(--brand-800); line-height: 1.5;
+  }
+  .callout b { font-weight: 600; }
+
+  /* ---------- product ---------- */
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 26px; }
+  .shot .browser { height: 262px; border-radius: 10px; }
+  .shot .browser img { width: 100%; height: calc(100% - 24px); object-fit: cover; object-position: top center; display: block; }
+  .shot .cap { margin-top: 12px; }
+  .shot .cap h3 { font-size: 14px; font-weight: 600; }
+  .shot .cap p { margin-top: 4px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .shot .tag { display: inline-block; margin-bottom: 7px; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand-700); font-weight: 600; }
+
+  /* ---------- architecture ---------- */
+  .flow { display: flex; align-items: stretch; gap: 12px; margin-top: 36px; }
+  .flow-col { display: flex; flex-direction: column; gap: 8px; }
+  .flow-label { font-size: 8.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); font-weight: 600; margin-bottom: 2px; }
+  .node {
+    border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 11px 13px;
+    font-size: 11.5px; color: var(--slate); line-height: 1.4;
+  }
+  .node b { display: block; font-size: 11.5px; color: var(--ink); font-weight: 600; }
+  .node.hi { border-color: rgba(20, 134, 106, 0.22); background: var(--brand-soft); }
+  .exasol-box {
+    flex: 1; border: 1px solid rgba(20, 134, 106, 0.25); background: linear-gradient(180deg, #fbfefc, #f4fbf8);
+    border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+  }
+  .exasol-box .hdr { display: flex; align-items: center; justify-content: space-between; }
+  .exasol-box .hdr span { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-700); font-weight: 600; }
+  .exasol-box .hdr em { font-style: normal; font-size: 8px; color: var(--faint); }
+  .exasol-inner { display: grid; gap: 6px; }
+  .exasol-row { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e6efe9; border-radius: 7px; padding: 7px 9px; }
+  .exasol-row .sq { width: 18px; height: 18px; border-radius: 5px; background: var(--brand-soft); display: flex; align-items: center; justify-content: center; flex: none; }
+  .exasol-row .sq svg { width: 11px; height: 11px; }
+  .exasol-row p { font-size: 9.5px; line-height: 1.3; color: var(--slate); }
+  .exasol-row p b { color: var(--ink); font-weight: 600; }
+  .arrow { display: flex; align-items: center; color: var(--faint); font-size: 16px; flex: none; }
+  .stack-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; }
+  .tech { font-size: 8.5px; padding: 4px 7px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-family: "JetBrains Mono", monospace; }
+
+  /* ---------- benchmark ---------- */
+  .bench-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 46px; margin-top: 30px; align-items: center; }
+  .big-stat { font-size: 72px; line-height: 0.95; letter-spacing: -0.06em; font-weight: 600; color: var(--brand-700); }
+  .big-stat span { font-size: 30px; letter-spacing: -0.03em; }
+  .big-label { margin-top: 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .bench-note { margin-top: 14px; font-size: 11px; line-height: 1.6; color: var(--muted); max-width: 380px; }
+  .rt { display: flex; align-items: baseline; gap: 10px; margin-top: 22px; }
+  .rt .x { font-family: "JetBrains Mono", monospace; font-size: 21px; font-weight: 600; }
+  .rt .t { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .rt .line { flex: 1; height: 1px; background: var(--line); }
+  .bench-table { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .bench-table table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .bench-table th { text-align: left; padding: 10px 13px; background: #f8fafc; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .bench-table td { padding: 12px 13px; border-top: 1px solid #eef2f6; color: var(--slate); }
+  .bench-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .bench-table td strong { color: var(--ink); font-weight: 600; }
+  .honesty { margin-top: 12px; border-left: 2px solid var(--amber); background: var(--amber-soft); padding: 8px 11px; border-radius: 0 6px 6px 0; font-size: 9px; line-height: 1.5; color: #92400e; }
+
+  /* ---------- compliance ---------- */
+  .comp-grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 42px; margin-top: 30px; }
+  .checks { margin-top: 4px; }
+  .check { display: flex; gap: 9px; padding: 7px 0; font-size: 12.5px; color: var(--slate); line-height: 1.45; }
+  .check .tick { width: 15px; height: 15px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-700); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
+  .check .tick svg { width: 9px; height: 9px; }
+  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .reg { border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; background: #fff; }
+  .reg b { display: block; font-size: 11px; line-height: 1.35; font-weight: 600; color: var(--ink); }
+  .reg span { display: block; margin-top: 3px; font-size: 9px; color: var(--faint); }
+  .draft-note { margin-top: 16px; font-size: 10.5px; line-height: 1.55; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  .draft-note b { color: var(--amber); font-weight: 600; }
+
+  /* ---------- india ---------- */
+  .india-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
+  .tile { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; background: #fff; }
+  .tile .t { font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .tile .a { margin-top: 7px; font-size: 21px; letter-spacing: -0.03em; font-weight: 600; }
+  .tile .a small { font-size: 10.5px; color: var(--muted); font-weight: 400; letter-spacing: 0; }
+  .tile .b { margin-top: 4px; font-size: 10.5px; color: var(--muted); line-height: 1.45; }
+  .quote { margin-top: 12px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; }
+  .quote-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+  .quote-card .qh { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand-700); font-weight: 600; }
+  .quote-card p { margin-top: 5px; font-size: 10.5px; line-height: 1.55; color: var(--slate); }
+  .quote-card .sig { margin-top: 6px; font-size: 8.5px; color: var(--faint); }
+  .path { border: 1px solid rgba(20, 134, 106, 0.2); background: var(--brand-soft); }
+  .path .a { font-size: 16px; font-weight: 600; color: var(--brand-800); letter-spacing: -0.02em; }
+  .path .b { margin-top: 3px; font-size: 9.5px; line-height: 1.5; color: var(--brand-800); }
+
+  /* added visual blocks */
+  .compare { margin-top: 24px; }
+  .cmp-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .cmp-label { width: 78px; flex: none; font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .cmp-bar { flex: 1; height: 8px; border-radius: 99px; background: #eef2f6; overflow: hidden; }
+  .cmp-bar i { display: block; height: 100%; border-radius: 99px; background: #94a3b8; }
+  .cmp-val { width: 62px; flex: none; text-align: right; font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--slate); }
+
+  .delta-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .delta { border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: #fff; }
+  .delta .old { display: block; font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .delta .new { display: block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--brand-800); line-height: 1.35; }
+
+  .exasol-foot { margin-top: auto; padding-top: 9px; border-top: 1px dashed #dcebe3; font-size: 8.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .exasol-foot svg { width: 11px; height: 11px; color: var(--brand); flex: none; }
+
+  .bench-stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 18px; }
+  .bs { padding: 12px 14px; background: #fff; border-left: 1px solid var(--line); }
+  .bs:first-child { border-left: 0; }
+  .bs b { display: block; font-size: 19px; font-weight: 600; letter-spacing: -0.03em; }
+  .bs span { display: block; margin-top: 3px; font-size: 7.8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+
+  .notice-flow { display: flex; margin-top: 16px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+  .nf { flex: 1; padding: 12px 13px; border-left: 1px solid var(--line); }
+  .nf:first-child { border-left: 0; }
+  .nf .n { font-family: "JetBrains Mono", monospace; font-size: 8px; color: var(--brand-700); }
+  .nf b { display: block; margin-top: 3px; font-size: 10.5px; font-weight: 600; }
+  .nf span { display: block; margin-top: 2px; font-size: 8.5px; line-height: 1.4; color: var(--muted); }
+
+  .score-viz { margin-top: 16px; border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px 18px; background: #fff; }
+  .sv-head { display: flex; align-items: center; justify-content: space-between; font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .sv-head b { color: var(--slate); letter-spacing: 0; text-transform: none; font-size: 10.5px; font-weight: 600; }
+  .sv-track { position: relative; height: 8px; margin: 38px 0 22px; border-radius: 99px; background: linear-gradient(90deg, #fecaca 0%, #fde68a 56%, #bbf7d0 72%, #6ee7b7 100%); }
+  .sv-line { position: absolute; top: -14px; width: 1px; height: 36px; border-left: 1px dashed #cbd5e1; }
+  .sv-line span { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 0 3px; background: #fff; font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); font-weight: 600; white-space: nowrap; }
+  .sv-dot { position: absolute; top: -7px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2); }
+  .sv-dot span { position: absolute; left: 50%; transform: translateX(-50%); top: 22px; font-size: 9px; font-weight: 600; white-space: nowrap; }
+  .sv-dot.declined { background: var(--red); }
+  .sv-dot.declined span { color: var(--red); }
+  .sv-dot.approved { background: var(--brand); }
+  .sv-dot.approved span { color: var(--brand-700); }
+  .sv-gain { position: absolute; left: 71.2%; transform: translateX(-50%); top: -30px; background: var(--brand-soft); border: 1px solid rgba(20, 134, 106, 0.2); color: var(--brand-800); font-size: 9px; font-weight: 600; padding: 3px 7px; border-radius: 999px; white-space: nowrap; }
+
+  .fromto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .ft { border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; background: #fff; font-size: 9.5px; line-height: 1.45; color: var(--muted); }
+  .ft b { color: var(--brand-800); font-weight: 600; }
+
+  /* ---------- impact ---------- */
+  .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+  .who-card { border: 1px solid var(--line); border-radius: 11px; padding: 18px 18px 16px; background: #fff; }
+  .who-card .ico { width: 32px; height: 32px; border-radius: 8px; background: var(--brand-soft); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+  .who-card .ico svg { width: 16px; height: 16px; }
+  .who-card h3 { margin-top: 12px; font-size: 15px; letter-spacing: -0.01em; }
+  .who-card p { margin-top: 7px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 22px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .metric { padding: 14px 16px; background: #fff; border-left: 1px solid var(--line); }
+  .metric:first-child { border-left: 0; }
+  .metric .v { font-size: 23px; font-weight: 600; letter-spacing: -0.03em; }
+  .metric .k { margin-top: 4px; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .roadmap { margin-top: 16px; font-size: 10.5px; color: var(--muted); }
+  .roadmap b { color: var(--slate); font-weight: 600; }
+
+  /* ---------- close ---------- */
+  .close { background: linear-gradient(145deg, #ffffff 0%, #fbfcfd 50%, #f1f8f5 100%); }
+  .close-grid { display: grid; grid-template-columns: 1.18fr 0.82fr; gap: 44px; margin-top: 32px; align-items: start; }
+  .code-card { border: 1px solid #1e293b; background: #0b1220; border-radius: 11px; overflow: hidden; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18); }
+  .code-bar { display: flex; align-items: center; gap: 5px; padding: 8px 11px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .code-bar i { width: 6px; height: 6px; border-radius: 50%; background: #334155; display: block; }
+  .code-bar span { margin-left: 6px; font-size: 8px; color: #64748b; font-family: "JetBrains Mono", monospace; }
+  .code-card pre { margin: 0; padding: 15px 17px 17px; font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 1.9; color: #cbd5e1; white-space: pre-wrap; }
+  .code-card pre b { color: #5eead4; font-weight: 500; }
+  .code-card pre em { color: #64748b; font-style: normal; }
+  .repo { margin-top: 14px; display: flex; align-items: center; gap: 10px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .repo .lbl { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .repo .url { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--slate); }
+  .qr-card { border: 1px solid var(--line); border-radius: 11px; background: #fff; padding: 12px; display: flex; gap: 12px; align-items: center; }
+  .qr-card img { width: 86px; height: 86px; border-radius: 5px; display: block; }
+  .qr-card .h { font-size: 10.5px; font-weight: 600; }
+  .qr-card .p { margin-top: 3px; font-size: 8.5px; color: var(--muted); line-height: 1.45; }
+  .materials { margin-top: 12px; border: 1px solid var(--line); border-radius: 9px; background: #fff; padding: 10px 12px; }
+  .mat { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 9.5px; color: var(--slate); border-top: 1px solid #f1f5f9; }
+  .mat:first-child { border-top: 0; }
+  .mat span { color: var(--faint); }
+  .close .footer { border-top-color: #dbe5e0; }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <!-- 1 · Cover -->
+  <section class="slide cover">
+    <div class="cover-grid">
+      <div class="cover-left">
+        <div class="brand">
+          <span class="mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          <span>
+            <span class="brand-name">Credence<span>IQ</span></span>
+            <span class="brand-sub">Risk intelligence</span>
+          </span>
+        </div>
+
+        <p class="kicker" style="margin-top: 54px;">Exasol Hackathon · 2026</p>
+        <h1 class="title">Credit decisions<br />you can <em>defend.</em></h1>
+        <p class="lede">CredenceIQ reconciles conflicting credit exposure, re-scores applicants inside Exasol, and turns declines into regulator-ready disclosure drafts — with a full audit trail from portfolio number to factor-level reason.</p>
+
+        <div class="cover-tags">
+          <span class="pill green"><span class="dot"></span>Exasol Personal 2026.2</span>
+          <span class="pill">Python SET UDF</span>
+          <span class="pill">FastAPI</span>
+          <span class="pill">Next.js 15</span>
+        </div>
+
+        <div class="cover-foot">
+          <span class="mono">github.com/KrithickGanesh/credence-iq</span>
+          <span>·</span>
+          <span>Team CredenceIQ</span>
+        </div>
+      </div>
+
+      <div class="cover-right">
+        <div class="cover-glow"></div>
+        <div class="browser cover-browser">
+          <div class="browser-bar"><i></i><i></i><i></i><em>credenceiq · risk &amp; exposure</em></div>
+          <img src="../screenshots/overview.png" alt="CredenceIQ risk and exposure overview" />
+        </div>
+        <div class="cover-float">
+          <div class="num">₹181Cr</div>
+          <div class="lbl">Double-counted exposure</div>
+          <div class="sub">11.1% of the reported book, surfaced by facility-level reconciliation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · Problem -->
+  <section class="slide">
+    <p class="kicker">The problem</p>
+    <h2 class="title">The book doesn’t agree with itself.</h2>
+
+    <div class="problem-grid">
+      <div>
+        <div class="reason">
+          <span class="n">01</span>
+          <div>
+            <h3>Three ledgers, one borrower</h3>
+            <p>Core banking, card management, and micro-credit each report the same facility independently — often with different outstanding balances.</p>
+          </div>
+        </div>
+        <div class="reason">
+          <span class="n">02</span>
+          <div>
+            <h3>Exposure is overstated</h3>
+            <p>Double counting inflates the book, distorts utilisation and DTI, and pushes good applicants below the approval line.</p>
+          </div>
+        </div>
+        <div class="reason">
+          <span class="n">03</span>
+          <div>
+            <h3>Declines arrive without a defence</h3>
+            <p>A score is not a reason. Lenders need principal factors, appeal rights, and a grievance route the customer can act on.</p>
+          </div>
+        </div>
+        <p class="source">Seeded demo book: 30,000 customers · 115,733 exposures · 46,643 applications.</p>
+        <div class="compare">
+          <div class="cmp-row"><span class="cmp-label">Reported</span><span class="cmp-bar"><i style="width: 100%;"></i></span><span class="cmp-val">₹1,635Cr</span></div>
+          <div class="cmp-row"><span class="cmp-label">Reconciled</span><span class="cmp-bar"><i style="width: 88.9%; background: var(--brand);"></i></span><span class="cmp-val">₹1,453Cr</span></div>
+        </div>
+      </div>
+
+      <div class="stat-stack">
+        <div class="stat green">
+          <div class="v">₹181.1Cr</div>
+          <div class="k">Exposure removed by reconciliation</div>
+          <div class="d">₹1,635Cr reported → ₹1,453Cr reconciled · 11.1% of the book.</div>
+        </div>
+        <div class="stat">
+          <div class="v">19.1%</div>
+          <div class="k">Customers with a cross-ledger mismatch</div>
+          <div class="d">5,742 of 30,000 customers. A further 5,137 have minor variance.</div>
+        </div>
+        <div class="stat">
+          <div class="v">7,080</div>
+          <div class="k">True declines in the current book</div>
+          <div class="d">Each one needs a defensible, auditable adverse-action notice.</div>
+        </div>
+      </div>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · synthetic demonstration data</span><span class="pageno">02 / 10</span></footer>
+  </section>
+
+  <!-- 3 · Solution -->
+  <section class="slide" style="background: #fbfcfd;">
+    <p class="kicker">The solution</p>
+    <h2 class="title">One reconciled credit 360 — <em>inside the database.</em></h2>
+    <p class="lede">Every analytical step runs in Exasol. The API shapes responses; it does not recompute the book in Python.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="no">STEP 01</div>
+        <h3>Reconcile</h3>
+        <p><code>V_RECONCILED_CREDIT_360</code> deduplicates facilities across core banking, cards, and micro-credit, then derives variance, utilisation percentiles, and a transparent score.</p>
+      </div>
+      <div class="step">
+        <div class="no">STEP 02</div>
+        <h3>Re-score</h3>
+        <p>One weight table drives three execution paths: the Python API, the SQL view, and a generated <code>PYTHON3 SET UDF</code> that scores all 30,000 applicants in-database.</p>
+      </div>
+      <div class="step">
+        <div class="no">STEP 03</div>
+        <h3>Respond</h3>
+        <p>Generate a formal adverse-action notice and a plain-English companion with factor disclosures, appeal rights, and the exact path back to approval.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="pill green" style="flex: none;"><span class="dot"></span>Live SQL</span>
+      <span><b>No mocked core data.</b> Portfolio totals, applicant 360s, simulations, and notices are all driven by queries against the Exasol book.</span>
+    </div>
+
+    <div class="delta-row">
+      <div class="delta"><span class="old">Reported book</span><span class="new">₹1,635Cr → ₹1,453Cr reconciled</span></div>
+      <div class="delta"><span class="old">Historical decision</span><span class="new">Re-scored on deduplicated balances</span></div>
+      <div class="delta"><span class="old">Opaque decline</span><span class="new">Principal reasons + appeal route</span></div>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · one model, three execution paths</span><span class="pageno">03 / 10</span></footer>
+  </section>
+
+  <!-- 4 · Product -->
+  <section class="slide">
+    <p class="kicker">The product</p>
+    <h2 class="title">A workspace for risk, audit, and compliance.</h2>
+
+    <div class="shots">
+      <div class="shot">
+        <div class="browser">
+          <div class="browser-bar"><i></i><i></i><i></i><em>/</em></div>
+          <img src="../screenshots/overview.png" alt="Portfolio overview" />
+        </div>
+        <div class="cap">
+          <span class="tag">01 · Monitor</span>
+          <h3>Risk &amp; exposure</h3>
+          <p>Reconciled KPIs, decision mix, rejection velocity, denial drivers, and the largest unresolved exposures.</p>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="browser">
+          <div class="browser-bar"><i></i><i></i><i></i><em>/audit</em></div>
+          <img src="../screenshots/audit.png" alt="Discrepancy and exposure audit" />
+        </div>
+        <div class="cap">
+          <span class="tag">02 · Investigate</span>
+          <h3>Discrepancy audit</h3>
+          <p>Search the book, isolate conflicts, compare historical vs. re-scored decisions, and open the Applicant 360 drawer.</p>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="browser">
+          <div class="browser-bar"><i></i><i></i><i></i><em>/studio</em></div>
+          <img src="../screenshots/studio.png" alt="Adverse action and scenario studio" />
+        </div>
+        <div class="cap">
+          <span class="tag">03 · Act</span>
+          <h3>Adverse-action studio</h3>
+          <p>Re-score a file live, explore the path to approval, and generate the formal notice plus plain-English explanation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="pill" style="flex: none;">Applicant 360</span>
+      <span><b>Portfolio → applicant → facility → factor.</b> Every figure in the UI is traceable to the query and the record behind it.</span>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · three screens, one reconciled book</span><span class="pageno">04 / 10</span></footer>
+  </section>
+
+  <!-- 5 · Architecture -->
+  <section class="slide" style="background: #fbfcfd;">
+    <p class="kicker">Architecture</p>
+    <h2 class="title">Built around Exasol, not on top of it.</h2>
+
+    <div class="flow">
+      <div class="flow-col" style="width: 190px;">
+        <div class="flow-label">Source systems</div>
+        <div class="node"><b>Core banking</b>Term facilities</div>
+        <div class="node"><b>Card engine</b>Revolving lines</div>
+        <div class="node"><b>Micro-credit</b>Small-ticket loans</div>
+        <div class="node"><b>Bureau + applications</b>CIBIL-style feed</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="exasol-box">
+        <div class="hdr"><span>Exasol Personal 2026.2</span><em>127.0.0.1:8563</em></div>
+        <div class="exasol-inner">
+          <div class="exasol-row">
+            <span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="#14866a" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+            <p><b>7 tables</b> · 115,733 facility rows · 46,643 applications</p>
+          </div>
+          <div class="exasol-row">
+            <span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="#14866a" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+            <p><b>V_RECONCILED_CREDIT_360</b> · facility dedupe · variance · score</p>
+          </div>
+          <div class="exasol-row">
+            <span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="#14866a" stroke-width="2"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg></span>
+            <p><b>SCORE_PORTFOLIO</b> · Python SET UDF · 30,000 rows in ~0.7 s</p>
+          </div>
+          <div class="exasol-row">
+            <span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="#14866a" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>
+            <p><b>ADVERSE_ACTION_REPORTS</b> · persisted notices and generation metadata</p>
+          </div>
+        </div>
+        <div class="exasol-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Single source of truth for analytics, scoring, and notice evidence.
+        </div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-col" style="width: 176px;">
+        <div class="flow-label">API</div>
+        <div class="node"><b>FastAPI</b>Live SQL · 100% async pool</div>
+        <div class="node"><b>Template engine</b>Deterministic by default</div>
+        <div class="node"><b>Optional LLM</b>OpenAI · Anthropic · local</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-col" style="width: 166px;">
+        <div class="flow-label">Experience</div>
+        <div class="node"><b>Next.js 15</b>React 19 · Recharts</div>
+        <div class="node"><b>Analyst workspace</b>Overview · audit · studio</div>
+        <div class="node"><b>Print-ready</b>Notice + explanation</div>
+      </div>
+    </div>
+
+    <div class="stack-chips">
+      <span class="tech">Python 3.12</span>
+      <span class="tech">pyexasol 3</span>
+      <span class="tech">Exasol SLC python-3.12</span>
+      <span class="tech">FastAPI</span>
+      <span class="tech">Pydantic 2</span>
+      <span class="tech">Next.js 15.5</span>
+      <span class="tech">TypeScript</span>
+      <span class="tech">Tailwind 3.4</span>
+      <span class="tech">Docker Compose</span>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · Exasol Personal is the reference platform</span><span class="pageno">05 / 10</span></footer>
+  </section>
+
+  <!-- 6 · Benchmark -->
+  <section class="slide">
+    <p class="kicker">Performance</p>
+    <h2 class="title">400 round-trips <em>→</em> one set-based pass.</h2>
+
+    <div class="bench-grid">
+      <div>
+        <div class="big-stat">99.0<span>%</span></div>
+        <div class="big-label">Lower wall time · 5,190.9 ms saved</div>
+        <p class="bench-note">The same 100-customer reconciled result, composed two ways over the same Exasol data. One set-based credit-360 query replaces four hundred sequential round-trips.</p>
+        <div class="rt">
+          <span class="x">5,244.7 ms</span>
+          <span class="line"></span>
+          <span class="t">N+1 composition · 400 round-trips</span>
+        </div>
+        <div class="rt" style="margin-top: 10px;">
+          <span class="x" style="color: var(--brand-700);">53.8 ms</span>
+          <span class="line"></span>
+          <span class="t">Single pass · 1 round-trip</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="bench-table">
+          <table>
+            <thead>
+              <tr><th>Path</th><th style="text-align: right;">Round-trips</th><th style="text-align: right;">Median</th><th style="text-align: right;">ms / customer</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Per-customer N+1</td><td class="num">400</td><td class="num">5,244.7 ms</td><td class="num">52.4</td></tr>
+              <tr><td>Single set-based pass</td><td class="num"><strong>1</strong></td><td class="num"><strong>53.8 ms</strong></td><td class="num"><strong>0.5</strong></td></tr>
+              <tr><td>Portfolio aggregate scan</td><td class="num">1</td><td class="num">131.7 ms</td><td class="num">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="honesty"><b>Honest benchmark.</b> This measures query composition over the same Exasol data — not Exasol against another engine. Warm connections, 100-customer sample, median of 3 runs.</div>
+      </div>
+    </div>
+
+    <div class="bench-stats">
+      <div class="bs"><b>30,000</b><span>Applicants scored in-database</span></div>
+      <div class="bs"><b>99.95%</b><span>Score agreement with the view</span></div>
+      <div class="bs"><b>100%</b><span>Decision agreement</span></div>
+      <div class="bs"><b>131.7 ms</b><span>Portfolio aggregate scan</span></div>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · Windows 11 · Exasol Personal 2026.2.0 · warm pool</span><span class="pageno">06 / 10</span></footer>
+  </section>
+
+  <!-- 7 · Compliance -->
+  <section class="slide" style="background: #fbfcfd;">
+    <p class="kicker">Compliance by design</p>
+    <h2 class="title">Explainability is a regulatory requirement.</h2>
+
+    <div class="comp-grid">
+      <div>
+        <p class="small" style="font-size: 11px; color: var(--slate); font-weight: 600;">Every decline carries</p>
+        <div class="checks">
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>Principal reason codes with factor weights</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>The observed value, benchmark, and score impact</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>Bureau, utilisation, DTI, and exposure disclosures</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>Appeal rights and a named grievance route</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>A plain-English companion with next steps</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>Provider, model, and generation mode persisted</div>
+        </div>
+        <div class="draft-note"><b>Draft, not legal advice.</b> Deterministic by default; optional hosted or local LLM. Every notice says so.</div>
+      </div>
+
+      <div>
+        <p class="small" style="font-size: 11px; color: var(--slate); font-weight: 600;">Citations verified against official sources</p>
+        <div class="reg-grid" style="margin-top: 8px;">
+          <div class="reg"><b>RBI Credit Information Reporting Directions</b><span>2025 · bureau use, dispute, correction</span></div>
+          <div class="reg"><b>RBI Digital Lending Directions</b><span>2025 · disclosures, borrower communication</span></div>
+          <div class="reg"><b>Fair Practices Code</b><span>reasonable, non-discriminatory reasons</span></div>
+          <div class="reg"><b>Integrated Ombudsman Scheme</b><span>2021 · escalation route</span></div>
+          <div class="reg"><b>CICRA</b><span>2005 · credit-information rights</span></div>
+          <div class="reg"><b>DPDP Act + Rules</b><span>2023 / 2025 · purpose, notice, grievance</span></div>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+          <span class="pill amber">Synthetic demo data</span>
+          <span class="pill">No production PII</span>
+          <span class="pill">Model weights auditable</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 20px; margin-bottom: 7px;">
+      <p class="small" style="font-size: 11px; color: var(--slate); font-weight: 600;">Anatomy of a generated notice</p>
+      <span class="small" style="font-size: 9px;">Persisted with provider, model, mode, and factor payload</span>
+    </div>
+    <div class="notice-flow" style="margin-top: 0;">
+      <div class="nf"><span class="n">01</span><b>Principal reason</b><span>Factor code and weight</span></div>
+      <div class="nf"><span class="n">02</span><b>Evidence</b><span>Observed value vs benchmark</span></div>
+      <div class="nf"><span class="n">03</span><b>Impact</b><span>Points contributed</span></div>
+      <div class="nf"><span class="n">04</span><b>Appeal</b><span>Rights and review route</span></div>
+      <div class="nf"><span class="n">05</span><b>Grievance</b><span>Named contact and escalation</span></div>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · engineering demonstration, not a legal opinion</span><span class="pageno">07 / 10</span></footer>
+  </section>
+
+  <!-- 8 · India -->
+  <section class="slide">
+    <p class="kicker">India localisation</p>
+    <h2 class="title">Built for the Indian lending stack.</h2>
+
+    <div class="india-grid">
+      <div class="tile">
+        <div class="t">Currency</div>
+        <div class="a">₹1,88,643 <small>· ₹1,453Cr</small></div>
+        <div class="b">Indian digit grouping throughout — lakh and crore on dense screens, full rupees in notices.</div>
+      </div>
+      <div class="tile">
+        <div class="t">Bureau scale</div>
+        <div class="a">300–900 <small>· approve 750 · refer 680</small></div>
+        <div class="b">CIBIL-style model score, directly comparable to the bureau benchmark of 680.</div>
+      </div>
+      <div class="tile">
+        <div class="t">Identity</div>
+        <div class="a">en_IN <small>· curated city/state map</small></div>
+        <div class="b">Names, cities, and addresses are internally consistent — no “Gudivada, Madhya Pradesh”.</div>
+      </div>
+      <div class="tile">
+        <div class="t">Disclosure</div>
+        <div class="a">RBI + DPDP <small>· factor metadata</small></div>
+        <div class="b">Reason codes cite the instrument behind them; notices carry appeal and grievance routes.</div>
+      </div>
+    </div>
+
+    <div class="quote">
+      <div class="quote-card">
+        <div class="qh">Plain-English companion · live draft</div>
+        <p>“Our records show a 9.4% difference between systems for the same account. We are required to resolve this before relying on the balance. The acceptable variance is 2.0% or less.”</p>
+        <div class="sig">Generated from the factor payload · deterministic template</div>
+      </div>
+      <div class="quote-card path">
+        <div class="qh">Demo path · customer 129798</div>
+        <div class="a">675.5 → 778.9</div>
+        <div class="b">Declined → Approved after the full ₹22.7K card payoff, mismatch resolution, and ₹2.5L verified income. Each lever alone stays below 750.</div>
+      </div>
+    </div>
+
+    <div class="score-viz">
+      <div class="sv-head"><span>Score journey · customer 129798</span><b>+103.4 points</b></div>
+      <div class="sv-track">
+        <div class="sv-line" style="left: 63.33%;"><span>refer 680</span></div>
+        <div class="sv-line" style="left: 75%;"><span>approve 750</span></div>
+        <div class="sv-dot declined" style="left: 62.58%;"><span>675.5</span></div>
+        <div class="sv-dot approved" style="left: 79.82%;"><span>778.9</span></div>
+      </div>
+    </div>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · deterministic seed 42 · reproducible book</span><span class="pageno">08 / 10</span></footer>
+  </section>
+
+  <!-- 9 · Impact -->
+  <section class="slide" style="background: #fbfcfd;">
+    <p class="kicker">Why it matters</p>
+    <h2 class="title">Less reconciliation. More defensible decisions.</h2>
+
+    <div class="who">
+      <div class="who-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div>
+        <h3>Risk teams</h3>
+        <p>One reconciled view of the book. Re-score the entire portfolio in the database instead of stitching four queries per customer.</p>
+      </div>
+      <div class="who-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Compliance</h3>
+        <p>Consistent reason codes, factor evidence, appeal rights, and a persisted audit trail for every notice generated.</p>
+      </div>
+      <div class="who-card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></div>
+        <h3>Borrowers</h3>
+        <p>Clear reasons, the figures behind them, and a documented path back to approval — including the exact paydown gap.</p>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="v">5,742</div><div class="k">Mismatches surfaced</div></div>
+      <div class="metric"><div class="v">30,000</div><div class="k">Applicants scored in-database</div></div>
+      <div class="metric"><div class="v">99.0%</div><div class="k">Lower wall time</div></div>
+      <div class="metric"><div class="v">100%</div><div class="k">UDF decision agreement</div></div>
+    </div>
+
+    <p class="roadmap"><b>Next:</b> bureau and Account Aggregator connectors · model governance and drift monitoring · multi-tenant lender deployment · configurable notice templates.</p>
+
+    <div class="fromto">
+      <div class="ft">Three ledger views <b>→ facility-level truth</b></div>
+      <div class="ft">Four queries per customer <b>→ one set-based pass</b></div>
+      <div class="ft">Ad-hoc decline emails <b>→ persisted, factor-level notices</b></div>
+    </div>
+    <p class="small" style="margin-top: 12px; font-size: 9.5px;">Success metrics: reconciliation coverage · mismatch resolution time · notice generation latency · appeal and override rate.</p>
+    <footer class="footer"><span><strong>CredenceIQ</strong> · measured on the seeded 30,000-customer book</span><span class="pageno">09 / 10</span></footer>
+  </section>
+
+  <!-- 10 · Close -->
+  <section class="slide close">
+    <p class="kicker">Run it locally</p>
+    <h2 class="title">The whole book is <em>reproducible.</em></h2>
+    <p class="lede">Exasol Personal, a deterministic seed, and two app processes. The README has the full quickstart and the fallback path.</p>
+
+    <div class="close-grid">
+      <div>
+        <div class="code-card">
+          <div class="code-bar"><i></i><i></i><i></i><span>powershell · quickstart</span></div>
+          <pre><em># 1 · database</em>
+<b>exakit</b> start
+<b>exakit</b> status
+
+<em># 2 · deterministic book</em>
+<b>python</b> seed_data.py --if-empty --customers 30000
+
+<em># 3 · API + dashboard</em>
+<b>uvicorn</b> app.main:app --port 8000
+<b>npm</b> run dev</pre>
+        </div>
+        <div class="repo">
+          <div>
+            <div class="lbl">Repository</div>
+            <div class="url">github.com/KrithickGanesh/credence-iq</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="qr-card">
+          <img src="repo-qr.png" alt="QR code to the CredenceIQ repository" />
+          <div>
+            <div class="h">Source, deck, and demo</div>
+            <div class="p">Scan to open the public repository and the full run instructions.</div>
+          </div>
+        </div>
+        <div class="materials">
+          <div class="mat"><strong>Source code</strong><span>FastAPI · Next.js · seed</span></div>
+          <div class="mat"><strong>README</strong><span>quickstart + architecture</span></div>
+          <div class="mat"><strong>Pitch deck</strong><span>docs/pitch-deck.pdf</span></div>
+          <div class="mat"><strong>Demo video</strong><span>docs/demo/credenceiq-demo.mp4</span></div>
+          <div class="mat"><strong>Benchmark</strong><span>scripts/benchmark.py</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px; display: flex; align-items: center; justify-content: space-between;">
+      <div class="brand" style="gap: 8px;">
+        <span class="mark" style="width: 28px; height: 28px; border-radius: 7px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 600;">Credence<span style="color: var(--brand);">IQ</span></span>
+      </div>
+      <span class="small" style="font-size: 9px;">Synthetic demonstration data · not legal advice · MIT licensed</span>
+    </div>
+    <footer class="footer"><span><strong>Team CredenceIQ</strong> · Exasol Hackathon 2026</span><span class="pageno">10 / 10</span></footer>
+  </section>
+
+</main>
+</body>
+</html>

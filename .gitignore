@@ -43,3 +43,6 @@ Thumbs.db
 *.parquet
 data/
 benchmarks/results/
+
+# Demo recording intermediates
+docs/demo/raw/

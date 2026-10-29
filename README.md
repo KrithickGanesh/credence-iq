@@ -14,6 +14,26 @@ The reference deployment is **Exasol Personal 2026.2.0** running locally (Podman
 
 ---
 
+## Submission materials
+
+[![Watch the CredenceIQ demo](docs/demo/thumbnail.png)](docs/demo/credenceiq-demo.mp4)
+
+| Material | Where |
+| --- | --- |
+| Source code | this repository (MIT) |
+| README + run instructions | this file, [Quickstart](#quickstart---exasol-personal-primary) |
+| Pitch deck | [docs/pitch-deck.pdf](docs/pitch-deck.pdf) · 10 slides |
+| Demo video | [docs/demo/credenceiq-demo.mp4](docs/demo/credenceiq-demo.mp4) · 70 s, 1440×810, captioned |
+| Dashboard screenshots | [docs/screenshots](docs/screenshots) |
+| Benchmark | [Performance benchmark](#performance-benchmark) · `scripts/benchmark.py` |
+
+There is **no hosted demo**. CredenceIQ runs against Exasol Personal on your machine; the
+video walks through the deterministic seeded book, and the quickstart below reproduces the
+same state end to end. The demo uses a synthetic book and generates draft notices, not legal
+advice.
+
+---
+
 ## What it demonstrates
 
 | Capability | Implementation |
@@ -395,10 +415,10 @@ curl "http://localhost:8000/api/applications?eligibility_decision=DECLINED&discr
 # Applicant 360 for the demo file
 curl "http://localhost:8000/api/applicant/129798/reconciliation"
 
-# What-if: pay down ₹1,50,000, verify ₹2,50,000 income, resolve the mismatch
+# What-if: pay off the ₹22,732 card balance, verify ₹2,50,000 income, resolve the mismatch
 curl -X POST "http://localhost:8000/api/applicant/129798/simulate" \
   -H "Content-Type: application/json" \
-  -d '{"revolving_paydown":150000,"income_increase_annual":250000,"resolve_exposure_mismatch":true,"additional_hard_inquiries":0}'
+  -d '{"revolving_paydown":23000,"income_increase_annual":250000,"resolve_exposure_mismatch":true,"additional_hard_inquiries":0}'
 
 # Formal adverse-action draft
 curl -X POST "http://localhost:8000/api/applicant/129798/adverse-action" \
@@ -429,8 +449,9 @@ The seed is deterministic, so this sequence is reproducible.
    decision. Open applicant **129798**.
 3. **Applicant 360** — Manthan Aurora (Puducherry), score **675.5**, grade E, gap **74.5**
    to approval. Reported ₹1,33,878.01 vs reconciled ₹1,22,319.41 (9.45% variance).
-4. **Studio** — keep 129798. Apply ₹1,50,000 revolving paydown, resolve the mismatch, and
-   add ₹2,50,000 of verified annual income. The score moves to **778.9** (approved).
+4. **Studio** — keep 129798. Apply the full ₹23,000 revolving paydown (the seeded card
+   balance is ₹22,732.10), resolve the mismatch, and add ₹2,50,000 of verified annual
+   income. The score moves to **778.9** (approved).
    Individually the levers add **+11.9**, **+33.1**, and **+58.3** — none crosses 750 alone.
 5. **Generate notice** — formal and plain-English drafts with principal reasons, RBI/DPDP
    references, appeal route, and the draft disclaimer. The report is persisted.
@@ -633,7 +654,16 @@ credence-iq/
 │   ├── components/            shell, UI primitives, Recharts charts
 │   ├── lib/                   typed API client, hooks, formatters
 │   └── Dockerfile
-├── scripts/benchmark.py       N+1 vs single-pass access benchmark
+├── docs/
+│   ├── pitch-deck.pdf         rendered 10-slide deck
+│   ├── pitch-deck/            deck source HTML, QR asset
+│   ├── demo/                  title/end cards, MP4, thumbnail
+│   └── screenshots/           captured dashboard views
+├── scripts/
+│   ├── benchmark.py           N+1 vs single-pass access benchmark
+│   ├── record_demo.py         Playwright screen recording
+│   ├── build_demo.py          MP4 assembly + thumbnail
+│   └── render_demo_cards.py   title/end card renderer
 ├── seed_data.py               DDL, synthetic generator, view + UDF creation
 ├── docker-compose.yml         app tier against host Exasol Personal
 ├── docker-compose.docker-db.yml  optional Exasol container fallback
