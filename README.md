@@ -2,6 +2,21 @@
 
 **Enterprise risk intelligence and adverse-action platform for Indian lenders, powered by Exasol.**
 
+## Problem statement
+
+Indian retail borrowers who are declined often receive a vague or generic reason, with no
+clear factor, observed value, or route to challenge the decision. Risk and compliance teams
+face the same file from the other side: core banking, card, and micro-credit systems report
+overlapping facilities and conflicting balances, so exposure is double-counted and otherwise
+creditworthy applicants can be declined. This matters because RBI fair-practice and
+digital-lending requirements call for clear communication, a documented grievance route, and
+accountable use of personal data, while reconciliation failures distort portfolio risk and
+provisioning decisions. Without facility-level reconciliation and factor-level evidence,
+lenders cannot demonstrate that a decision was fair, reproducible, and based on the right
+exposure — and applicants cannot meaningfully appeal.
+
+## What CredenceIQ does
+
 CredenceIQ ingests a synthetic Indian lending book spread across three conflicting
 exposure ledgers, reconciles every facility inside Exasol, re-scores applicants from the
 deduplicated balances, and turns declines into regulator-ready disclosure drafts — with a
