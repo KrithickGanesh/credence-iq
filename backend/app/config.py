@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     exasol_host: str = "127.0.0.1"
     exasol_port: int = 8563
